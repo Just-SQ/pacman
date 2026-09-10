@@ -1,7 +1,7 @@
 [project]
 name = "pacman-13"
 version = "0.1.0"
-description = "Add your description here"
+description = "Ghosts! More ghosts!"
 readme = "README.md"
 authors = [
     { email = "fox.jsq02@gmail.com" }
@@ -10,6 +10,19 @@ requires-python = ">=3.14"
 dependencies = [
     "mazegenerator",
 ]
+
+[dependency-groups]
+dev = [
+    "flake8>=7.3.0",
+    "mypy>=2.3.1",
+    "ruff>=0.16.6",
+]
+
+[tool.ruff]
+line-length = 79
+
+[tool.mypy]
+exclude = ".venv"
 
 [tool.uv.sources]
 mazegenerator = { path = "src/mazegenerator-00001/mazegenerator-2.1.0-py3-none-any.whl" }
