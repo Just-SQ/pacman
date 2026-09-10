@@ -101,7 +101,6 @@ shortest_path = maze_gen.shortest_path
 print(f"Maze dimensions: {len(maze_grid[0])}x{len(maze_grid)}")
 print(f"Entry: {maze_gen.maze_entry}, Exit: {maze_gen.maze_exit}")
 rendrer.render()
-from json import load
 
 with open("src/config.json") as f:
     conf = f.read()

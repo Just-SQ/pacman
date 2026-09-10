@@ -35,12 +35,6 @@ class Parser:
 
     def _validate(self, loaded_str: Any) -> dict[str, Any]:
         result: Any = loaded_str
-        int_keys: set[str] = {
-            "lives",
-            "points_per_pacgum",
-            "points_per_super_pacgum",
-            "points_per_ghost",
-        }
         if not isinstance(result, dict):
             raise ValueError("top level must be a JSON object")
         unknown: set[Any] = set(result) - set(self.DEFAULT_CONFIG)
@@ -50,10 +44,10 @@ class Parser:
             if key not in result:
                 result[key] = self.DEFAULT_CONFIG[key]
                 print(f"Warning: '{key}' is missing, using {result[key]}")
-            elif key in int_keys:
-                self._validate_int_keys(result, key)
             elif key == "level":
                 self._validate_level(result, key)
+            elif key in self.BOUNDS:
+                self._validate_int_keys(result, key)
             elif key == "highscore_filename":
                 if not isinstance(result[key], str):
                     result[key] = self.DEFAULT_CONFIG[key]
@@ -63,7 +57,11 @@ class Parser:
                     )
         return result
 
-    def _validate_int_keys(self, result, key) -> None:
+    def _validate_int_keys(
+        self,
+        result: dict[str, Any],
+        key: str
+    ) -> None:
         low, high = self.BOUNDS[key]
         try:
             if isinstance(result[key], bool):
@@ -78,7 +76,11 @@ class Parser:
                 f"between {low} and {high}, using {result[key]}"
             )
 
-    def _validate_level(self, result, key) -> None:
+    def _validate_level(
+        self,
+        result: dict[str, Any],
+        key: str
+    ) -> None:
         low, high = self.BOUNDS[key]
         try:
             if len(result[key]) != 2:
@@ -87,6 +89,7 @@ class Parser:
             result[key][1] = int(result[key][1])
             if not self._level_inbound(result, key, low, high):
                 raise ValueError()
+            result[key] = tuple(result[key])
         except Exception:
             result[key] = self.DEFAULT_CONFIG[key]
             print(
@@ -94,5 +97,11 @@ class Parser:
                 f"each one between {low} and {high}, using {result[key]}"
             )
 
-    def _level_inbound(self, result, key, low, high) -> bool:
+    def _level_inbound(
+        self,
+        result: dict[str, Any],
+        key: str,
+        low: int,
+        high: int
+    ) -> Any:
         return low <= result[key][0] <= high and low <= result[key][1] <= high
