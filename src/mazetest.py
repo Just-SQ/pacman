@@ -1,5 +1,6 @@
 from mazegenerator import MazeGenerator
 
+
 class MazeRenderer:
     """
     Renders a maze to the terminal using Unicode block characters.
@@ -15,7 +16,7 @@ class MazeRenderer:
         "entry": "\033[94m",
         "exit": "\033[95m",
         "path": "\033[92m",
-        "reset": "\033[0m"
+        "reset": "\033[0m",
     }
 
     def __init__(self, maze: MazeGenerator) -> None:
@@ -39,9 +40,7 @@ class MazeRenderer:
                 as the solution. If None, no path is drawn.
         """
 
-        solution_coordinates: set[tuple[int, int]] = set(
-            solution_path or []
-        )
+        solution_coordinates: set[tuple[int, int]] = set(solution_path or [])
         PATH_COLOR: str = self._COLORS["path"]
         RESET: str = self._COLORS["reset"]
         WALL: str = f"{colors}██"
@@ -70,7 +69,7 @@ class MazeRenderer:
                     else:
                         mid_line += "  "
 
-                if cell == 0xf:
+                if cell == 0xF:
                     mid_line += "░░"
                 elif (x, y) == (self.maze._entryx, self.maze._entryy):
                     mid_line += f"{self._COLORS['entry']}██{RESET}"
@@ -89,6 +88,7 @@ class MazeRenderer:
 
         print("██" * (self.maze._width * 2 + 1))
         print(f"{RESET}")
+
 
 # Create a simple 20x20 maze
 maze_gen = MazeGenerator((60, 70))

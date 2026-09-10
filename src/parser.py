@@ -4,32 +4,32 @@ import json
 
 class Parser:
     DEFAULT_CONFIG: dict[str, Any] = {
-  "highscore_filename": "top_scores.txt",
-  "level": (20, 20),
-  "lives": 3,
-  "points_per_pacgum": 5,
-  "points_per_super_pacgum": 100,
-  "points_per_ghost": 500
-}
+        "highscore_filename": "top_scores.txt",
+        "level": (20, 20),
+        "lives": 3,
+        "points_per_pacgum": 5,
+        "points_per_super_pacgum": 100,
+        "points_per_ghost": 500,
+    }
     BOUNDS: dict[str, tuple[int, int]] = {
-    "lives": (1, 99),
-    "points_per_pacgum": (1, 100000),
-    "points_per_super_pacgum": (1, 100000),
-    "points_per_ghost": (1, 100000),
-    "level": (10, 50) 
-}
+        "lives": (1, 99),
+        "points_per_pacgum": (1, 100000),
+        "points_per_super_pacgum": (1, 100000),
+        "points_per_ghost": (1, 100000),
+        "level": (10, 50),
+    }
 
     def __init__(self, path: str) -> None:
         self.path: str = path
 
     def parse(self) -> dict[str, Any]:
-        string: str = ''
+        string: str = ""
         with open(self.path) as f:
             for line in f:
-                if not line.strip().startswith('#'):
+                if not line.strip().startswith("#"):
                     string += line
                 else:
-                    string += '\n'
+                    string += "\n"
         loaded_str: Any = json.loads(string)
         return self._validate(loaded_str)
 
@@ -39,7 +39,7 @@ class Parser:
             "lives",
             "points_per_pacgum",
             "points_per_super_pacgum",
-            "points_per_ghost"
+            "points_per_ghost",
         }
         if not isinstance(result, dict):
             raise ValueError("top level must be a JSON object")
@@ -57,7 +57,10 @@ class Parser:
             elif key == "highscore_filename":
                 if not isinstance(result[key], str):
                     result[key] = self.DEFAULT_CONFIG[key]
-                    print(f"Warning: '{key}' must be text, using 'top_scores.txt'")
+                    print(
+                        f"Warning: '{key}' must be text, "
+                        "using 'top_scores.txt'"
+                    )
         return result
 
     def _validate_int_keys(self, result, key) -> None:
@@ -68,9 +71,12 @@ class Parser:
             result[key] = int(result[key])
             if result[key] < low or result[key] > high:
                 raise ValueError()
-        except (ValueError, TypeError):
+        except ValueError, TypeError:
             result[key] = self.DEFAULT_CONFIG[key]
-            print(f"Warning: {key} must be an integer between {low} and {high}, using {result[key]}")
+            print(
+                f"Warning: {key} must be an integer "
+                f"between {low} and {high}, using {result[key]}"
+            )
 
     def _validate_level(self, result, key) -> None:
         low, high = self.BOUNDS[key]
@@ -83,7 +89,10 @@ class Parser:
                 raise ValueError()
         except Exception:
             result[key] = self.DEFAULT_CONFIG[key]
-            print(f"Warning: {key} must be [width, height] each one between {low} and {high}, using {result[key]}")
+            print(
+                f"Warning: {key} must be [width, height] "
+                f"each one between {low} and {high}, using {result[key]}"
+            )
 
     def _level_inbound(self, result, key, low, high) -> bool:
         return low <= result[key][0] <= high and low <= result[key][1] <= high
