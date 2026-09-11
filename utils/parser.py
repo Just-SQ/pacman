@@ -57,11 +57,7 @@ class Parser:
                     )
         return result
 
-    def _validate_int_keys(
-        self,
-        result: dict[str, Any],
-        key: str
-    ) -> None:
+    def _validate_int_keys(self, result: dict[str, Any], key: str) -> None:
         low, high = self.BOUNDS[key]
         try:
             if isinstance(result[key], bool):
@@ -76,11 +72,7 @@ class Parser:
                 f"between {low} and {high}, using {result[key]}"
             )
 
-    def _validate_level(
-        self,
-        result: dict[str, Any],
-        key: str
-    ) -> None:
+    def _validate_level(self, result: dict[str, Any], key: str) -> None:
         low, high = self.BOUNDS[key]
         try:
             if len(result[key]) != 2:
@@ -98,10 +90,6 @@ class Parser:
             )
 
     def _level_inbound(
-        self,
-        result: dict[str, Any],
-        key: str,
-        low: int,
-        high: int
+        self, result: dict[str, Any], key: str, low: int, high: int
     ) -> Any:
         return low <= result[key][0] <= high and low <= result[key][1] <= high

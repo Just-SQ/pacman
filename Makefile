@@ -1,4 +1,4 @@
-NAME = src/pac-man.py
+NAME = pac-man.py
 RUN  = uv run
 
 all: run
@@ -7,7 +7,7 @@ install:
 	uv sync
 
 run:
-	$(RUN) $(NAME) src/config.json
+	$(RUN) $(NAME) config.json
 
 debug:
 	$(RUN) -m pdb $(NAME)

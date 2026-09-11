@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 from json import JSONDecodeError
-from parser import Parser
+
+from utils import Parser
 
 
 def main() -> None:
