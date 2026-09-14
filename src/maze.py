@@ -28,6 +28,12 @@ class Board:
                     grid[2 * y + 2][2 * x + 1] = self.CORRIDOR
         return grid
 
+    def is_walkable(self, square: tuple[int, int]) -> bool:
+        x, y = square
+        if not (0 <= x < len(self.grid[0]) and 0 <= y < len(self.grid)):
+            return False
+        return self.grid[y][x] == self.CORRIDOR
+
     def ghosts_supergums_spawn(
         self
     ) -> tuple[
@@ -48,8 +54,8 @@ class Board:
 
     def pacgums(self) -> set[tuple[int, int]]:
         pacgums: set[tuple[int, int]] = set()
-        for y, row in enumerate(self.grid):
-            for x, block in enumerate(row):
-                if block == self.CORRIDOR:
+        for y in range(len(self.grid)):
+            for x in range(len(self.grid[0])):
+                if self.is_walkable((x, y)):
                     pacgums.add((x, y))
         return pacgums
