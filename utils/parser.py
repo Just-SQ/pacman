@@ -16,7 +16,7 @@ class Parser:
         "points_per_pacgum": (1, 100000),
         "points_per_super_pacgum": (1, 100000),
         "points_per_ghost": (1, 100000),
-        "level": (10, 50),
+        "level": (14, 50),
     }
 
     def __init__(self, path: str) -> None:
@@ -65,7 +65,7 @@ class Parser:
             result[key] = int(result[key])
             if result[key] < low or result[key] > high:
                 raise ValueError()
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             result[key] = self.DEFAULT_CONFIG[key]
             print(
                 f"Warning: {key} must be an integer "

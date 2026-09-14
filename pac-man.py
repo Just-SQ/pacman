@@ -1,14 +1,14 @@
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 from json import JSONDecodeError
 
 from utils import Parser
 
 
 def main() -> None:
-    arg_parse = ArgumentParser()
+    arg_parse: ArgumentParser = ArgumentParser()
     arg_parse.add_argument("config_file")
-    arg = arg_parse.parse_args()
-    parser = Parser(arg.config_file)
+    arg: Namespace = arg_parse.parse_args()
+    parser: Parser = Parser(arg.config_file)
     print(parser.parse())
 
 
