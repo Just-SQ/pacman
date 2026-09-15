@@ -9,3 +9,8 @@ wheels/
 # Virtual environments
 .venv
 .vscode
+
+
+gametest.py
+.mypy_cache/
+.ruff_cache/

@@ -34,17 +34,13 @@ class Board:
             return False
         return self.grid[y][x] == self.CORRIDOR
 
-    def ghosts_supergums_spawn(
-        self
-    ) -> tuple[
-        tuple[int, int], tuple[int, int], tuple[int, int], tuple[int, int]
-    ]:
-        return (
+    def supgums_spawn(self) -> set[tuple[int, int]]:
+        return {
             (1, 1),
             (2 * self.width - 1, 2 * self.height - 1),
             (2 * self.width - 1, 1),
             (1, 2 * self.height - 1)
-        )
+        }
 
     def pacman_spawn(self) -> tuple[int, int]:
         logo_w, logo_h = 7, 5
@@ -58,4 +54,6 @@ class Board:
             for x in range(len(self.grid[0])):
                 if self.is_walkable((x, y)):
                     pacgums.add((x, y))
+        pacgums -= self.supgums_spawn()
+        pacgums.discard(self.pacman_spawn())
         return pacgums

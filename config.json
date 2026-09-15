@@ -1,8 +1,8 @@
 {
   "highscore_filename": "newfile",
-  "level": [30, 30],
-  "lives": 1,
+  "level": [14, 14],
+  "lives": 3,
   "points_per_pacgum": 8,
   "points_per_super_pacgum": 8,
-  "pointper_ghost": 8
+  "point_per_ghost": 8
 }

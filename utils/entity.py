@@ -12,12 +12,25 @@ class Direction(Enum):
 
 
 class Entity(ABC):
+    MOVES: tuple[Direction, Direction, Direction, Direction] = (
+        Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT
+    )
+
+    OPPOSITE: dict[Direction, Direction] = {
+        Direction.NONE: Direction.NONE,
+        Direction.UP: Direction.DOWN,
+        Direction.DOWN: Direction.UP,
+        Direction.LEFT: Direction.RIGHT,
+        Direction.RIGHT: Direction.LEFT
+    }
+
     def __init__(
         self, spawn: tuple[int, int], speed: float, board: Board
     ) -> None:
-        self.x, self.y = spawn
+        self.spawn: tuple[int, int] = spawn
+        self.x, self.y = self.spawn
         self.speed: float = speed  # speed=1 -> "crosses 1 tiles per second"
-        self.direction = Direction.NONE
+        self.direction: Direction = Direction.NONE
         self.progress: float = 0.0
         self.board: Board = board
 
@@ -29,6 +42,11 @@ class Entity(ABC):
     def next_tile(self) -> tuple[int, int]:
         dx, dy = self.direction.value
         return (self.x + dx, self.y + dy)
+
+    def reset(self) -> None:
+        self.x, self.y = self.spawn
+        self.direction = Direction.NONE
+        self.progress = 0.0
 
     def update(self, fps: int = 60) -> None:
         if self.direction == Direction.NONE:
