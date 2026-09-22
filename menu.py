@@ -1,0 +1,121 @@
+from __future__ import annotations
+
+import pyglet
+from pyglet.window import key
+
+WINDOW_WIDTH = 1448
+WINDOW_HEIGHT = 1028
+
+YELLOW = (255, 255, 0, 255)
+GOLD = (170, 128, 0, 255)
+BROWN = (74, 52, 12, 255)
+
+
+class View:
+    def draw(self) -> None: ...
+
+    def key_handler(self, symbol: int) -> View | None:
+        return None
+
+    @staticmethod
+    def make_label(
+        text: str,
+        y: int,
+        size: int,
+        color: tuple[int, int, int, int] = (255, 255, 255, 255),
+    ) -> pyglet.text.Label:
+        return pyglet.text.Label(
+            text,
+            x=WINDOW_WIDTH // 2,
+            y=y,
+            anchor_x="center",
+            font_size=size,
+            color=color,
+            weight="normal",
+            font_name="Press Start 2P",
+        )
+
+    @staticmethod
+    def make_title(text: str, y: int, size: int) -> list[pyglet.text.Label]:
+        """Stack three offset copies of the text to fake a 3D bevel."""
+        layers = (
+            (8, -8, BROWN),
+            (4, -4, GOLD),
+            (0, 0, YELLOW),
+        )
+        labels: list[pyglet.text.Label] = []
+        for dx, dy, color in layers:
+            label = View.make_label(text, y + dy, size, color)
+            label.x += dx
+            labels.append(label)
+        return labels
+
+
+class MenuView(View):
+    OPTIONS: list[str] = [
+        "Start game",
+        "Leaderboard",
+        "Credit",
+    ]
+
+    def __init__(self) -> None:
+        self.title: list[pyglet.text.Label] = self.make_title(
+            "Pac-Man", WINDOW_HEIGHT - 300, 60
+        )
+        self.background: pyglet.sprite.Sprite = pyglet.sprite.Sprite(
+            pyglet.image.load("assets/images/menu_bg.png"),
+            x=0,
+            y=0,
+        )
+        self.options: list[pyglet.text.Label] = [
+            self.make_label(text, 500 - i * 50, 24)
+            for i, text in enumerate(self.OPTIONS)
+        ]
+
+        self.selected_view: int = 0
+        self._refresh_menu()
+
+    def _refresh_menu(self) -> None:
+        for i, option in enumerate(self.options):
+            option.color = (
+                (255, 255, 0, 255)
+                if i == self.selected_view
+                else (170, 170, 170, 255)
+            )
+
+    def draw(self) -> None:
+        self.background.draw()
+        for layer in self.title:
+            layer.draw()
+        for option in self.options:
+            option.draw()
+
+    def key_handler(self, symbol: int) -> View | None:
+        if symbol in (key.UP, key.W, key.K):
+            self.selected_view = (self.selected_view - 1) % len(self.OPTIONS)
+            self._refresh_menu()
+        if symbol in (key.DOWN, key.S, key.J):
+            self.selected_view = (self.selected_view + 1) % len(self.OPTIONS)
+            self._refresh_menu()
+        return None
+
+
+class GameWindow(pyglet.window.Window):
+    def __init__(self) -> None:
+        super().__init__(WINDOW_WIDTH, WINDOW_HEIGHT, caption="Pac-Man")
+        pyglet.font.add_file("assets/fonts/PressStart2P-Regular.ttf")
+        self.current_view: View = MenuView()
+
+    def on_draw(self) -> None:
+        self.clear()
+        self.current_view.draw()
+
+    def on_key_press(self, symbol: int, modifiers: int) -> None:
+        _ = self.current_view.key_handler(symbol)
+        if symbol == key.ESCAPE:
+            self.close()
+
+
+if __name__ == "__main__":
+    _ = GameWindow()
+    pyglet.app.run()
