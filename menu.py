@@ -16,6 +16,8 @@ BROWN = (74, 52, 12, 255)
 class View:
     def draw(self) -> None: ...
 
+    def update(self, dt: float) -> None: ...
+
     def key_handler(self, symbol: int) -> View | None:
         return None
 
@@ -61,8 +63,11 @@ class MenuView(View):
         "Leaderboard",
         "Credit",
     ]
+    OPTION_X = WINDOW_WIDTH // 2 - 160
     FIRST_OPTION_Y = 500
     ROW_HEIGHT = 64
+    MOUTHS = (0, 20, 45, 90, 45)
+    CHOMP_SECONDS = 0.25
 
     def __init__(self) -> None:
         self.title: list[pyglet.text.Label] = self.make_title(
@@ -78,15 +83,21 @@ class MenuView(View):
                 text,
                 self.option_y(i),
                 24,
-                x=WINDOW_WIDTH // 2 - 160,
+                x=self.OPTION_X,
                 anchor_x="left",
             )
             for i, text in enumerate(self.OPTIONS)
         ]
 
+        self.frames: list[pyglet.image.ImageData] = [
+            self._make_pacman(11, 4, mouth) for mouth in self.MOUTHS
+        ]
+        self.frame_index: int = 0
+        self.chomp_timer: float = 0.0
+
         self.cursor: pyglet.sprite.Sprite = pyglet.sprite.Sprite(
-            self._make_pacman(11, 4, 45),
-            x=WINDOW_WIDTH // 2 - 240,
+            self.frames[0],
+            x=self.OPTION_X - 70,
             y=0,
         )
 
@@ -140,6 +151,13 @@ class MenuView(View):
             option.draw()
         self.cursor.draw()
 
+    def update(self, dt: float) -> None:
+        self.chomp_timer += dt
+        if self.chomp_timer >= self.CHOMP_SECONDS:
+            self.chomp_timer = 0.0
+            self.frame_index = (self.frame_index + 1) % len(self.frames)
+            self.cursor.image = self.frames[self.frame_index]
+
     def key_handler(self, symbol: int) -> View | None:
         if symbol in (key.UP, key.W, key.K):
             self.selected_view = (self.selected_view - 1) % len(self.OPTIONS)
@@ -155,6 +173,10 @@ class GameWindow(pyglet.window.Window):
         super().__init__(WINDOW_WIDTH, WINDOW_HEIGHT, caption="Pac-Man")
         pyglet.font.add_file("assets/fonts/PressStart2P-Regular.ttf")
         self.current_view: View = MenuView()
+        pyglet.clock.schedule_interval(self.update, 1 / 60)
+
+    def update(self, dt: float) -> None:
+        self.current_view.update(dt)
 
     def on_draw(self) -> None:
         self.clear()
