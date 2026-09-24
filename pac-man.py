@@ -1,7 +1,10 @@
 from argparse import ArgumentParser, Namespace
 from json import JSONDecodeError
 
-from utils import Parser
+import pyglet
+
+from src import GameWindow
+from src.utils import Parser
 
 
 def main() -> None:
@@ -10,6 +13,9 @@ def main() -> None:
     arg: Namespace = arg_parse.parse_args()
     parser: Parser = Parser(arg.config_file)
     print(parser.parse())
+
+    _ = GameWindow()
+    pyglet.app.run()
 
 
 if __name__ == "__main__":

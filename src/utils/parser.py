@@ -65,7 +65,7 @@ class Parser:
             result[key] = int(result[key])
             if result[key] < low or result[key] > high:
                 raise ValueError()
-        except (ValueError, TypeError):
+        except ValueError, TypeError:
             result[key] = self.DEFAULT_CONFIG[key]
             print(
                 f"Warning: {key} must be an integer "
