@@ -19,7 +19,7 @@ class View:
         size: int,
         y: int,
         x: int = constants.WINDOW_WIDTH // 2,
-        color: tuple[int, int, int, int] = (255, 255, 255, 255),
+        color: tuple[int, int, int, int] = constants.WHITE,
         anchor_x: Literal["left", "center", "right"] = "center",
     ) -> pyglet.text.Label:
         return pyglet.text.Label(

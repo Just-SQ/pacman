@@ -2,13 +2,13 @@ import pyglet
 from pyglet.window import key
 
 from src import constants
-
-from .view import View
+from src.entities.pacman import Pacman
+from src.views import View
 
 
 class MenuView(View):
     OPTIONS: tuple[str, ...] = (
-        "Start game",
+        "Start Game",
         "Leaderboard",
         "Instructions",
         "Credit",
@@ -48,6 +48,37 @@ class MenuView(View):
             color=constants.GREY,
         )
 
+        self.options: list[pyglet.text.Label] = [
+            self.make_label(
+                text,
+                24,
+                y=constants.WINDOW_HEIGHT - 490 - i * 58,
+            )
+            for i, text in enumerate(self.OPTIONS)
+        ]
+        self.selected_option: int = 0
+
+        self.cursor: Pacman = Pacman()
+
+        self._move_cursor()
+
+    def _move_cursor(self) -> None:
+        for i, option in enumerate(self.options):
+            option.color = (
+                constants.YELLOW
+                if i == self.selected_option
+                else constants.LIGHT_GREY
+            )
+
+        selected_option = self.options[self.selected_option]
+        self.cursor.x = (
+            selected_option.x - selected_option.content_width / 2 - 42
+        )
+        self.cursor.y = selected_option.y
+
+    def update(self, dt: float) -> None:
+        self.cursor.animate(dt)
+
     def draw(self) -> None:
         self.background.draw()
         self.tagline.draw()
@@ -55,9 +86,32 @@ class MenuView(View):
             layer.draw()
         self.rule.draw()
         self.version.draw()
+        for label in self.options:
+            label.draw()
+        self.cursor.draw()
         self.hint.draw()
 
     def key_handler(self, symbol: int) -> View | None:
         if symbol == key.ESCAPE:
             pyglet.app.exit()
+        if symbol in (key.UP, key.W, key.K):
+            self.selected_option = (self.selected_option - 1) % len(
+                self.OPTIONS
+            )
+            self._move_cursor()
+        if symbol in (key.DOWN, key.S, key.J):
+            self.selected_option = (self.selected_option + 1) % len(
+                self.OPTIONS
+            )
+            self._move_cursor()
+        if symbol in (key.RETURN, key.SPACE):
+            return self._open_selected()
+
+        return None
+
+    def _open_selected(self) -> View | None:
+        choice = self.OPTIONS[self.selected_option]
+        if choice == "Exit":
+            pyglet.app.exit()
+
         return None
