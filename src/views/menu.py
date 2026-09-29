@@ -5,6 +5,7 @@ from src import constants
 from src.entities.pacman import Pacman
 from src.views import View
 from src.views.credit import CreditView
+from src.views.instructions import InstructionsView
 
 
 class MenuView(View):
@@ -115,6 +116,8 @@ class MenuView(View):
 
         if choice == "Credit":
             return CreditView(self)
+        if choice == "Instructions":
+            return InstructionsView(self)
         if choice == "Exit":
             pyglet.app.exit()
 
