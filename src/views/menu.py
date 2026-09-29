@@ -4,6 +4,7 @@ from pyglet.window import key
 from src import constants
 from src.entities.pacman import Pacman
 from src.views import View
+from src.views.credit import CreditView
 
 
 class MenuView(View):
@@ -111,6 +112,9 @@ class MenuView(View):
 
     def _open_selected(self) -> View | None:
         choice = self.OPTIONS[self.selected_option]
+
+        if choice == "Credit":
+            return CreditView(self)
         if choice == "Exit":
             pyglet.app.exit()
 
