@@ -1,3 +1,5 @@
 {
-  "reportImplicitOverride": false
+    "reportImplicitOverride": false,
+    "reportAny": false,
+    "reportExplicitAny": false
 }
