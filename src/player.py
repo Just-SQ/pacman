@@ -1,4 +1,5 @@
-from utils.entity import Direction, Entity
+from src.utils.entity import Direction, Entity
+
 from .maze import Board
 
 
@@ -11,6 +12,6 @@ class Player(Entity):
 
     def _choose_direction(self) -> None:
         if self._can_move(self.dir_wanted):
-            self.direction = self.dir_wanted
+            self.direction: Direction = self.dir_wanted
         elif not self._can_move(self.direction):
             self.direction = Direction.NONE

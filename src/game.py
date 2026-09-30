@@ -1,9 +1,11 @@
+from enum import Enum, auto
 from typing import Any
+
+from mazegenerator import MazeGenerator
+
+from .ghost import Ghost, GhostMode
 from .maze import Board
 from .player import Player
-from mazegenerator import MazeGenerator
-from enum import Enum, auto
-from .ghost import Ghost, GhostMode
 
 
 class State(Enum):
@@ -40,9 +42,7 @@ class Game:
         self.sup_gums: set[tuple[int, int]] = self.board.supgums_spawn()
         self.player_spawn: tuple[int, int] = self.board.pacman_spawn()
         self.player: Player = Player(
-            spawn=self.player_spawn,
-            speed=self.PLAYER_SPEED,
-            board=self.board
+            spawn=self.player_spawn, speed=self.PLAYER_SPEED, board=self.board
         )
         ghost_sp: float = self.GHOST_SPEED + self.GHOST_UP * (self.level - 1)
         self.ghosts: list[Ghost] = [
@@ -50,7 +50,8 @@ class Game:
             for id, corner in enumerate(self.sup_gums)
         ]
         self.time_left: float = (
-            len(self.pacgums) * self.TIME_PER_GUM
+            len(self.pacgums)
+            * self.TIME_PER_GUM
             * self.TIME_DECAY ** (self.level - 1)
         )
         self.power_time: float = 0.0

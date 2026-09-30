@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import Enum
+
 from src.maze import Board
 
 
@@ -13,7 +14,10 @@ class Direction(Enum):
 
 class Entity(ABC):
     MOVES: tuple[Direction, Direction, Direction, Direction] = (
-        Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT
+        Direction.UP,
+        Direction.DOWN,
+        Direction.LEFT,
+        Direction.RIGHT,
     )
 
     OPPOSITE: dict[Direction, Direction] = {
@@ -21,14 +25,15 @@ class Entity(ABC):
         Direction.UP: Direction.DOWN,
         Direction.DOWN: Direction.UP,
         Direction.LEFT: Direction.RIGHT,
-        Direction.RIGHT: Direction.LEFT
+        Direction.RIGHT: Direction.LEFT,
     }
 
     def __init__(
         self, spawn: tuple[int, int], speed: float, board: Board
     ) -> None:
         self.spawn: tuple[int, int] = spawn
-        self.x, self.y = self.spawn
+        self.x: int = self.spawn[0]
+        self.y: int = self.spawn[1]
         self.speed: float = speed  # speed=1 -> "crosses 1 tiles per second"
         self.direction: Direction = Direction.NONE
         self.progress: float = 0.0
