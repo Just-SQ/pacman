@@ -1,3 +1,5 @@
+from typing import Any
+
 import pyglet
 
 from src import constants
@@ -7,13 +9,15 @@ from .views.menu import MenuView
 
 
 class GameWindow(pyglet.window.Window):
-    def __init__(self) -> None:
+    def __init__(self, settings: dict[str, Any]) -> None:
         super().__init__(
             constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT, caption="Pac-Man"
         )
         pyglet.font.add_file("assets/fonts/PressStart2P-Regular.ttf")
-        self.current_view: View = MenuView()
         pyglet.clock.schedule_interval(self.update, 1 / constants.FPS)
+
+        self.current_view: View = MenuView(settings)
+        self.settings: dict[str, Any] = settings
 
     def update(self, dt: float) -> None:
         self.current_view.update(dt)

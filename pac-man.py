@@ -12,9 +12,8 @@ def main() -> None:
     arg_parse.add_argument("config_file")
     arg: Namespace = arg_parse.parse_args()
     parser: Parser = Parser(arg.config_file)
-    print(parser.parse())
 
-    _ = GameWindow()
+    _ = GameWindow(parser.parse())
     pyglet.app.run()
 
 

@@ -1,3 +1,5 @@
+from typing import Any
+
 import pyglet
 from pyglet.window import key
 
@@ -5,6 +7,7 @@ from src import constants
 from src.entities.pacman import Pacman
 from src.views import View
 from src.views.credit import CreditView
+from src.views.game import GameView
 from src.views.instructions import InstructionsView
 
 
@@ -17,7 +20,9 @@ class MenuView(View):
         "Exit",
     )
 
-    def __init__(self) -> None:
+    def __init__(self, settings: dict[str, Any]) -> None:
+        self.settings: dict[str, Any] = settings
+
         self.background: pyglet.sprite.Sprite = pyglet.sprite.Sprite(
             pyglet.image.load("assets/images/menu_bg.png"),
             x=0,
@@ -114,6 +119,8 @@ class MenuView(View):
     def _open_selected(self) -> View | None:
         choice = self.OPTIONS[self.selected_option]
 
+        if choice == "Start Game":
+            return GameView(self, self.settings)
         if choice == "Credit":
             return CreditView(self)
         if choice == "Instructions":
