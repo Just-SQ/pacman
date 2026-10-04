@@ -8,6 +8,7 @@ from src.utils import Parser
 
 
 def main() -> None:
+    """asdfasdfasdf"""
     arg_parse: ArgumentParser = ArgumentParser()
     arg_parse.add_argument("config_file")
     arg: Namespace = arg_parse.parse_args()
