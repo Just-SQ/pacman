@@ -35,6 +35,9 @@ class GameView(View):
         gap = max(2, self.tile // 5)
         self._draw_walls(2 * line + gap, constants.BLUE)
         self._draw_walls(gap, constants.OPAQUE)
+        self._draw_gums()
+
+        self.supergums: list[pyglet.sprite.Sprite] = self._make_supergums()
 
         self.walls: pyglet.sprite.Sprite = self._make_sprite()
 
@@ -89,6 +92,39 @@ class GameView(View):
                 ):
                     self._fill_rect(left, top, arm_length, arm_length, color)
 
+    def _draw_gums(self) -> None:
+        size = max(2, self.tile // 6)
+        for col, row in self.game.pacgums:
+            margin: int = (self.tile - size) // 2
+            left: int = col * self.tile + margin
+            top: int = row * self.tile + margin
+            self._fill_rect(left, top, size, size, constants.PINK)
+
+    def _draw_dot(self, col: int, row: int, size: int, color: Color) -> None:
+        margin = (self.tile - size) // 2
+        left = col * self.tile + margin
+        top = row * self.tile + margin
+        self._fill_rect(left, top, size, size, color)
+
+    def _square_center(self, col: float, row: float) -> tuple[float, float]:
+        left = (constants.WINDOW_WIDTH - self.image_width) // 2
+        bottom = (constants.WINDOW_HEIGHT - self.image_height) // 2
+        x = left + (col + 0.5) * self.tile
+        y = bottom + (self.rows - row - 0.5) * self.tile
+        return x, y
+
+    def _make_supergums(self) -> list[pyglet.sprite.Sprite]:
+        image = pyglet.image.load("assets/images/supergum.png")
+        image.anchor_x = image.width // 2
+        image.anchor_y = image.height // 2
+        sprites: list[pyglet.sprite.Sprite] = []
+        for col, row in self.game.sup_gums:
+            x, y = self._square_center(col, row)
+            sprite = pyglet.sprite.Sprite(image, x=x, y=y)
+            sprite.scale = self.tile * 0.6 / image.width
+            sprites.append(sprite)
+        return sprites
+
     def _is_wall(self, col: int, row: int) -> bool:
         inside = 0 <= col < self.cols and 0 <= row < self.rows
         return inside and not self.board.is_walkable((col, row))
@@ -98,6 +134,8 @@ class GameView(View):
 
     def draw(self) -> None:
         self.walls.draw()
+        for supergum in self.supergums:
+            supergum.draw()
 
     def key_handler(self, symbol: int) -> View | None:
         if symbol == key.ESCAPE:
