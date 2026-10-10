@@ -8,7 +8,7 @@ from src.game import Game
 from src.maze import Board
 from src.views import View
 
-WALL_DEBUG = False
+WALL_DEBUG = not not not not not not not True
 
 
 class GameView(View):
@@ -31,13 +31,13 @@ class GameView(View):
             bytes(constants.BLACK) * (self.image_width * self.image_height)
         )
 
-        line = max(1, self.tile // 10)
-        gap = max(1, self.tile // 5)
+        wall_size = round(self.tile * 0.4)
+        gap = round(wall_size * 0.4)
 
         self.wall_debug: bool = WALL_DEBUG
-        self._paint_walls(2 * line + gap, constants.BLUE)
+        self._paint_walls(wall_size, constants.BLUE)
         self.wall_debug = False
-        self._paint_walls(gap, constants.BLACK)
+        self._paint_walls(gap, (33, 33, 222, 60))
 
         self.maze: pyglet.sprite.Sprite = pyglet.sprite.Sprite(
             pyglet.image.ImageData(
@@ -70,29 +70,36 @@ class GameView(View):
                         )
 
         margin = (self.tile - size) // 2
-        wall_extention = self.tile - size
 
         for row in range(self.rows):
             for col in range(self.cols):
                 if self.board.is_walkable((col, row)):
                     continue
 
-                top = row * self.tile + margin
                 left = col * self.tile + margin
+                top = row * self.tile + margin
 
-                self._paint_rectangle(left, top, size, size, color)
+                self._paint_rounded_square(left, top, size, color)
 
                 if col + 1 < self.cols and not self.board.is_walkable(
                     (col + 1, row)
                 ):
                     self._paint_rectangle(
-                        left + size, top, wall_extention, size, color
+                        left + round(size * 0.8),
+                        top,
+                        self.tile,
+                        size,
+                        color,
                     )
                 if row + 1 < self.rows and not self.board.is_walkable(
                     (col, row + 1)
                 ):
                     self._paint_rectangle(
-                        left, top + size, size, wall_extention, color
+                        left,
+                        top + round(size * 0.8),
+                        size,
+                        self.tile,
+                        color,
                     )
                 if (
                     col + 1 < self.cols
@@ -102,12 +109,20 @@ class GameView(View):
                     and not self.board.is_walkable((col + 1, row + 1))
                 ):
                     self._paint_rectangle(
-                        left + size,
-                        top + size,
-                        wall_extention,
-                        wall_extention,
+                        left + round(size * 0.8),
+                        top + round(size * 0.8),
+                        self.tile,
+                        self.tile,
                         color,
                     )
+
+    def _paint_rounded_square(
+        self, left: int, top: int, size: int, color: types.Color
+    ) -> None:
+        notch = round(size * 0.2)
+        thickness = size - 2 * notch
+        self._paint_rectangle(left + notch, top, thickness, size, color)
+        self._paint_rectangle(left, top + notch, size, thickness, color)
 
     def _paint_rectangle(
         self, left: int, top: int, width: int, height: int, color: types.Color
