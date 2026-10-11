@@ -8,8 +8,6 @@ from src.game import Game
 from src.maze import Board
 from src.views import View
 
-WALL_DEBUG = not not not not not not not True
-
 
 class GameView(View):
     def __init__(self, menu_view: View, settings: dict[str, Any]) -> None:
@@ -34,10 +32,9 @@ class GameView(View):
         wall_size = round(self.tile * 0.4)
         gap = round(wall_size * 0.4)
 
-        self.wall_debug: bool = WALL_DEBUG
         self._paint_walls(wall_size, constants.BLUE)
-        self.wall_debug = False
-        self._paint_walls(gap, (33, 33, 222, 60))
+        self._paint_walls(gap, constants.TRANSPARENT_BLUE)
+        self._paint_gums()
 
         self.maze: pyglet.sprite.Sprite = pyglet.sprite.Sprite(
             pyglet.image.ImageData(
@@ -50,27 +47,10 @@ class GameView(View):
             x=(constants.WINDOW_WIDTH - self.image_width) // 2,
             y=(constants.WINDOW_HEIGHT - self.image_height) // 2,
         )
+        self.supergums: list[pyglet.sprite.Sprite] = self._make_supergums()
 
     def _paint_walls(self, size: int, color: types.Color) -> None:
-        if self.wall_debug:
-            for row in range(self.rows):
-                for col in range(self.cols):
-                    tile_color = (
-                        constants.LIGHT_GREY
-                        if (col + row) % 2
-                        else constants.BROWN
-                    )
-                    if not self.board.is_walkable((col, row)):
-                        self._paint_rectangle(
-                            col * self.tile,
-                            row * self.tile,
-                            self.tile,
-                            self.tile,
-                            tile_color,
-                        )
-
         margin = (self.tile - size) // 2
-
         for row in range(self.rows):
             for col in range(self.cols):
                 if self.board.is_walkable((col, row)):
@@ -78,7 +58,6 @@ class GameView(View):
 
                 left = col * self.tile + margin
                 top = row * self.tile + margin
-
                 self._paint_rounded_square(left, top, size, color)
 
                 if col + 1 < self.cols and not self.board.is_walkable(
@@ -116,6 +95,34 @@ class GameView(View):
                         color,
                     )
 
+    def _paint_gums(self) -> None:
+        size = round(self.tile * 0.2)
+        for col, row in self.game.pacgums:
+            margin: int = (self.tile - size) // 2
+            left: int = col * self.tile + margin
+            top: int = row * self.tile + margin
+            self._paint_rectangle(left, top, size, size, constants.PINK)
+
+    def _make_supergums(self) -> list[pyglet.sprite.Sprite]:
+        image = pyglet.image.load("assets/images/supergum.png")
+        image.anchor_x = image.width // 2
+        image.anchor_y = image.height // 2
+
+        sprites: list[pyglet.sprite.Sprite] = []
+        for col, row in self.game.sup_gums:
+            x, y = self._tile_center(col, row)
+            sprite = pyglet.sprite.Sprite(image, x=x, y=y)
+            sprite.scale = self.tile * 0.6 / image.width
+            sprites.append(sprite)
+        return sprites
+
+    def _tile_center(self, col: int, row: int) -> tuple[float, float]:
+        left = (constants.WINDOW_WIDTH - self.image_width) // 2
+        bottom = (constants.WINDOW_HEIGHT - self.image_height) // 2
+        x = left + (col + 0.5) * self.tile
+        y = bottom + (self.rows - row - 0.5) * self.tile
+        return x, y
+
     def _paint_rounded_square(
         self, left: int, top: int, size: int, color: types.Color
     ) -> None:
@@ -136,6 +143,8 @@ class GameView(View):
 
     def draw(self) -> None:
         self.maze.draw()
+        for supergum in self.supergums:
+            supergum.draw()
 
     def key_handler(self, symbol: int) -> View | None:
         if symbol == key.ESCAPE:
