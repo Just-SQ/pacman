@@ -152,6 +152,7 @@ class GameView(View):
         self._place_pacman()
         direction = self.game.player.direction
         if direction != Direction.NONE:
+            self.pacman.face(direction)
             self.pacman.animate(dt)
 
     def draw(self) -> None:
