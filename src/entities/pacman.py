@@ -4,7 +4,7 @@ import pyglet
 class Pacman(pyglet.sprite.Sprite):
     CHOMP: tuple[int, ...] = (0, 1, 2, 3, 2, 1)
 
-    def __init__(self, block: int = 3) -> None:
+    def __init__(self, block: float = 3) -> None:
         self.frames: list[pyglet.image.AbstractImage] = []
         for number in range(4):
             image = pyglet.image.load(f"assets/images/pacman_{number}.png")

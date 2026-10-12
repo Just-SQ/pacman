@@ -4,8 +4,10 @@ import pyglet
 from pyglet.window import key
 
 from src import constants, types
+from src.entities.pacman import Pacman
 from src.game import Game
 from src.maze import Board
+from src.utils.entity import Direction
 from src.views import View
 
 
@@ -48,6 +50,7 @@ class GameView(View):
             y=(constants.WINDOW_HEIGHT - self.image_height) // 2,
         )
         self.supergums: list[pyglet.sprite.Sprite] = self._make_supergums()
+        self.pacman: Pacman = Pacman(self.tile / 13)
 
     def _paint_walls(self, size: int, color: types.Color) -> None:
         margin = (self.tile - size) // 2
@@ -116,7 +119,11 @@ class GameView(View):
             sprites.append(sprite)
         return sprites
 
-    def _tile_center(self, col: int, row: int) -> tuple[float, float]:
+    def _place_pacman(self) -> None:
+        col, row = self.game.player.visual_position()
+        self.pacman.x, self.pacman.y = self._tile_center(col, row)
+
+    def _tile_center(self, col: float, row: float) -> tuple[float, float]:
         left = (constants.WINDOW_WIDTH - self.image_width) // 2
         bottom = (constants.WINDOW_HEIGHT - self.image_height) // 2
         x = left + (col + 0.5) * self.tile
@@ -139,14 +146,29 @@ class GameView(View):
             end = start + width * 4
             self.pixels[start:end] = bytes(color) * width
 
-    def update(self, dt: float) -> None: ...
+    def update(self, dt: float) -> None:
+        self.game.update(constants.FPS)
+
+        self._place_pacman()
+        direction = self.game.player.direction
+        if direction != Direction.NONE:
+            self.pacman.animate(dt)
 
     def draw(self) -> None:
         self.maze.draw()
         for supergum in self.supergums:
             supergum.draw()
+        self.pacman.draw()
 
     def key_handler(self, symbol: int) -> View | None:
+        if symbol in (key.UP, key.W, key.K):
+            self.game.player.dir_wanted = Direction.UP
+        if symbol in (key.DOWN, key.S, key.J):
+            self.game.player.dir_wanted = Direction.DOWN
+        if symbol in (key.LEFT, key.A, key.H):
+            self.game.player.dir_wanted = Direction.LEFT
+        if symbol in (key.RIGHT, key.D, key.L):
+            self.game.player.dir_wanted = Direction.RIGHT
         if symbol == key.ESCAPE:
             return self.menu_view
         return None
