@@ -5,7 +5,7 @@ from pyglet.window import key
 
 from src import constants, types
 from src.entities.pacman import Pacman
-from src.game import Game
+from src.game import Game, State
 from src.maze import Board
 from src.utils.entity import Direction
 from src.views import View
@@ -34,18 +34,21 @@ class GameView(View):
         wall_size = round(self.tile * 0.4)
         gap = round(wall_size * 0.4)
 
+        self.gums_on_screen: set[tuple[int, int]] = set(self.game.pacgums)
+
         self._paint_walls(wall_size, constants.BLUE)
         self._paint_walls(gap, constants.TRANSPARENT_BLUE)
         self._paint_gums()
 
+        self.maze_image: pyglet.image.ImageData = pyglet.image.ImageData(
+            self.image_width,
+            self.image_height,
+            "RGBA",
+            bytes(self.pixels),
+            pitch=-self.image_width * 4,
+        )
         self.maze: pyglet.sprite.Sprite = pyglet.sprite.Sprite(
-            pyglet.image.ImageData(
-                self.image_width,
-                self.image_height,
-                "RGBA",
-                bytes(self.pixels),
-                pitch=-self.image_width * 4,
-            ),
+            self.maze_image,
             x=(constants.WINDOW_WIDTH - self.image_width) // 2,
             y=(constants.WINDOW_HEIGHT - self.image_height) // 2,
         )
@@ -100,8 +103,8 @@ class GameView(View):
 
     def _paint_gums(self) -> None:
         size = round(self.tile * 0.2)
+        margin: int = (self.tile - size) // 2
         for col, row in self.game.pacgums:
-            margin: int = (self.tile - size) // 2
             left: int = col * self.tile + margin
             top: int = row * self.tile + margin
             self._paint_rectangle(left, top, size, size, constants.PINK)
@@ -146,8 +149,26 @@ class GameView(View):
             end = start + width * 4
             self.pixels[start:end] = bytes(color) * width
 
+    def _erase_eaten_gums(self) -> None:
+        eaten = self.gums_on_screen - self.game.pacgums
+        for cor in eaten:
+            self._erase_eaten_gum(*cor)
+        self.gums_on_screen -= eaten
+
+    def _erase_eaten_gum(self, col: int, row: int) -> None:
+        size = round(self.tile * 0.2)
+        margin = (self.tile - size) // 2
+        black = pyglet.image.ImageData(
+            size, size, "RGBA", bytes(constants.BLACK) * size**2
+        )
+        x = col * self.tile + margin
+        top = row * self.tile + margin
+        y = self.image_height - top - size
+        self.maze_image.get_texture().blit_into(black, x, y, 0)
+
     def update(self, dt: float) -> None:
         self.game.update(constants.FPS)
+        self._erase_eaten_gums()
 
         self._place_pacman()
         direction = self.game.player.direction
