@@ -5,7 +5,7 @@ from pyglet.window import key
 
 from src import constants, types
 from src.entities.pacman import Pacman
-from src.game import Game, State
+from src.game import Game
 from src.maze import Board
 from src.utils.entity import Direction
 from src.views import View
@@ -52,7 +52,9 @@ class GameView(View):
             x=(constants.WINDOW_WIDTH - self.image_width) // 2,
             y=(constants.WINDOW_HEIGHT - self.image_height) // 2,
         )
-        self.supergums: list[pyglet.sprite.Sprite] = self._make_supergums()
+        self.supergums: dict[tuple[int, int], pyglet.sprite.Sprite] = (
+            self._make_supergums()
+        )
         self.pacman: Pacman = Pacman(self.tile / 13)
 
     def _paint_walls(self, size: int, color: types.Color) -> None:
@@ -109,17 +111,17 @@ class GameView(View):
             top: int = row * self.tile + margin
             self._paint_rectangle(left, top, size, size, constants.PINK)
 
-    def _make_supergums(self) -> list[pyglet.sprite.Sprite]:
+    def _make_supergums(self) -> dict[tuple[int, int], pyglet.sprite.Sprite]:
         image = pyglet.image.load("assets/images/supergum.png")
         image.anchor_x = image.width // 2
         image.anchor_y = image.height // 2
 
-        sprites: list[pyglet.sprite.Sprite] = []
+        sprites: dict[tuple[int, int], pyglet.sprite.Sprite] = {}
         for col, row in self.game.sup_gums:
             x, y = self._tile_center(col, row)
             sprite = pyglet.sprite.Sprite(image, x=x, y=y)
             sprite.scale = self.tile * 0.6 / image.width
-            sprites.append(sprite)
+            sprites[col, row] = sprite
         return sprites
 
     def _place_pacman(self) -> None:
@@ -178,8 +180,9 @@ class GameView(View):
 
     def draw(self) -> None:
         self.maze.draw()
-        for supergum in self.supergums:
-            supergum.draw()
+        for corr, supergum in self.supergums.items():
+            if corr in self.game.sup_gums:
+                supergum.draw()
         self.pacman.draw()
 
     def key_handler(self, symbol: int) -> View | None:
