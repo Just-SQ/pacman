@@ -21,8 +21,8 @@ class GameView(View):
         self.cols: int = len(self.board.grid[0])
         self.rows: int = len(self.board.grid)
         self.tile: int = min(
-            constants.WINDOW_HEIGHT // self.rows,
-            constants.WINDOW_WIDTH // self.cols,
+            (constants.WINDOW_HEIGHT - constants.INFO_HEIGHT) // self.rows,
+            (constants.WINDOW_WIDTH - constants.INFO_WIDTH) // self.cols,
         )
 
         self.image_width: int = self.cols * self.tile
@@ -57,29 +57,29 @@ class GameView(View):
         )
         self.pacman: Pacman = Pacman(self.tile / 13)
 
-        left = ((constants.WINDOW_WIDTH - self.image_width) // 2) // 2
+        left = constants.INFO_WIDTH // 2
         right = constants.WINDOW_WIDTH - left
         top = constants.WINDOW_HEIGHT - 60
         bottom = 60
         self.infos: dict[str, pyglet.text.Label] = {
-            "score": self.make_label("SCORE", 24, top, left),
+            "score": self.make_label("SCORE", 20, top, left),
             "score_val": self.make_label(
-                "0", 24, top - 48, left, constants.YELLOW
+                "0", 18, top - 48, left, constants.YELLOW
             ),
-            "time": self.make_label("TIME", 24, top, right),
+            "time": self.make_label("TIME", 20, top, right),
             "time_val": self.make_label(
-                "0", 24, top - 48, right, constants.YELLOW
+                "0", 18, top - 48, right, constants.YELLOW
             ),
-            "lives": self.make_label("LIVES", 24, bottom + 48, right),
-            "level": self.make_label("LEVEL", 24, bottom + 48, left),
+            "lives": self.make_label("LIVES", 20, bottom + 48, right),
+            "level": self.make_label("LEVEL", 20, bottom + 48, left),
             "level_val": self.make_label(
-                str(self.game.level), 24, bottom, left, constants.YELLOW
+                str(self.game.level), 18, bottom, left, constants.YELLOW
             ),
         }
-        self.life_info_icon: Pacman = Pacman(2.5)
+        self.life_info_icon: Pacman = Pacman(1.8)
         self.life_info_icon.image = self.life_info_icon.frames[2]
         self.life_info_icon.y = bottom
-        self.life_info_icon_x: int = constants.WINDOW_WIDTH - left - 44
+        self.life_info_icon_x: int = constants.WINDOW_WIDTH - left - 38
 
     def _paint_walls(self, size: int, color: types.Color) -> None:
         margin = (self.tile - size) // 2
@@ -203,7 +203,7 @@ class GameView(View):
         self.life_info_icon.x = self.life_info_icon_x
         for _ in range(self.game.lives):
             self.life_info_icon.draw()
-            self.life_info_icon.x += 44
+            self.life_info_icon.x += 38
 
     def update(self, dt: float) -> None:
         self.game.update(constants.FPS)
