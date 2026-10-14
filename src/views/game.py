@@ -57,6 +57,30 @@ class GameView(View):
         )
         self.pacman: Pacman = Pacman(self.tile / 13)
 
+        left = ((constants.WINDOW_WIDTH - self.image_width) // 2) // 2
+        right = constants.WINDOW_WIDTH - left
+        top = constants.WINDOW_HEIGHT - 60
+        bottom = 60
+        self.infos: dict[str, pyglet.text.Label] = {
+            "score": self.make_label("SCORE", 24, top, left),
+            "score_val": self.make_label(
+                "0", 24, top - 48, left, constants.YELLOW
+            ),
+            "time": self.make_label("TIME", 24, top, right),
+            "time_val": self.make_label(
+                "0", 24, top - 48, right, constants.YELLOW
+            ),
+            "lives": self.make_label("LIVES", 24, bottom + 48, right),
+            "level": self.make_label("LEVEL", 24, bottom + 48, left),
+            "level_val": self.make_label(
+                str(self.game.level), 24, bottom, left, constants.YELLOW
+            ),
+        }
+        self.life_info_icon: Pacman = Pacman(2.5)
+        self.life_info_icon.image = self.life_info_icon.frames[2]
+        self.life_info_icon.y = bottom
+        self.life_info_icon_x: int = constants.WINDOW_WIDTH - left - 44
+
     def _paint_walls(self, size: int, color: types.Color) -> None:
         margin = (self.tile - size) // 2
         for row in range(self.rows):
@@ -168,6 +192,19 @@ class GameView(View):
         y = self.image_height - top - size
         self.maze_image.get_texture().blit_into(black, x, y, 0)
 
+    def _draw_infos(self) -> None:
+        self.infos["score_val"].text = str(self.game.score)
+        self.infos["time_val"].text = str(int(self.game.time_left))
+        self.infos["level_val"].text = str(self.game.level)
+
+        for info in self.infos.values():
+            info.draw()
+
+        self.life_info_icon.x = self.life_info_icon_x
+        for _ in range(self.game.lives):
+            self.life_info_icon.draw()
+            self.life_info_icon.x += 44
+
     def update(self, dt: float) -> None:
         self.game.update(constants.FPS)
         self._erase_eaten_gums()
@@ -184,6 +221,7 @@ class GameView(View):
             if corr in self.game.sup_gums:
                 supergum.draw()
         self.pacman.draw()
+        self._draw_infos()
 
     def key_handler(self, symbol: int) -> View | None:
         if symbol in (key.UP, key.W, key.K):
