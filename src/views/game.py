@@ -6,6 +6,7 @@ from pyglet.window import key
 from src import constants, types
 from src.entities.pacman import Pacman
 from src.game import Game
+from src.ghost import GhostMode
 from src.maze import Board
 from src.utils.entity import Direction
 from src.views import View
@@ -81,6 +82,15 @@ class GameView(View):
         self.life_info_icon.y = bottom
         self.life_info_icon_x: int = constants.WINDOW_WIDTH - left - 38
 
+        self.ghost_images: list[pyglet.image.AbstractImage] = [
+            self._load_image(f"ghost_{n}") for n in range(4)
+        ]
+        self.scared_image: pyglet.image.AbstractImage = self._load_image(
+            "ghost_scared"
+        )
+        self.eyes_image: pyglet.image.AbstractImage = self._load_image(
+            "ghost_eyes"
+        )
         self.ghosts: list[pyglet.sprite.Sprite] = self._make_ghosts()
 
     def _paint_walls(self, size: int, color: types.Color) -> None:
@@ -153,7 +163,7 @@ class GameView(View):
     def _make_ghosts(self) -> list[pyglet.sprite.Sprite]:
         sprites: list[pyglet.sprite.Sprite] = []
         for ghost in self.game.ghosts:
-            image = pyglet.image.load(f"assets/images/ghost_{ghost.g_id}.png")
+            image = self.ghost_images[ghost.g_id]
             image.anchor_x = image.width // 2
             image.anchor_y = image.height // 2
             sprite = pyglet.sprite.Sprite(image)
@@ -169,6 +179,12 @@ class GameView(View):
         for ghost, sprite in zip(self.game.ghosts, self.ghosts):
             col, row = ghost.visual_position()
             sprite.x, sprite.y = self._tile_center(col, row)
+            if ghost.mode is GhostMode.FRIGHTENED:
+                sprite.image = self.scared_image
+            elif ghost.mode is GhostMode.EATEN:
+                sprite.image = self.eyes_image
+            else:
+                sprite.image = self.ghost_images[ghost.g_id]
 
     def _tile_center(self, col: float, row: float) -> tuple[float, float]:
         left = (constants.WINDOW_WIDTH - self.image_width) // 2

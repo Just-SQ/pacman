@@ -48,3 +48,10 @@ class View:
             label.x += dx
             labels.append(label)
         return labels
+
+    @staticmethod
+    def _load_image(name: str) -> pyglet.image.AbstractImage:
+        image = pyglet.image.load(f"assets/images/{name}.png")
+        image.anchor_x = image.width // 2
+        image.anchor_y = image.height // 2
+        return image
