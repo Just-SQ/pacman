@@ -76,10 +76,12 @@ class GameView(View):
                 str(self.game.level), 18, bottom, left, constants.YELLOW
             ),
         }
-        self.life_info_icon: Pacman = Pacman(1.8)
+        self.life_info_icon: Pacman = Pacman(self.tile / 13)
         self.life_info_icon.image = self.life_info_icon.frames[2]
         self.life_info_icon.y = bottom
         self.life_info_icon_x: int = constants.WINDOW_WIDTH - left - 38
+
+        self.ghosts: list[pyglet.sprite.Sprite] = self._make_ghosts()
 
     def _paint_walls(self, size: int, color: types.Color) -> None:
         margin = (self.tile - size) // 2
@@ -148,15 +150,31 @@ class GameView(View):
             sprites[col, row] = sprite
         return sprites
 
+    def _make_ghosts(self) -> list[pyglet.sprite.Sprite]:
+        sprites: list[pyglet.sprite.Sprite] = []
+        for ghost in self.game.ghosts:
+            image = pyglet.image.load(f"assets/images/ghost_{ghost.g_id}.png")
+            image.anchor_x = image.width // 2
+            image.anchor_y = image.height // 2
+            sprite = pyglet.sprite.Sprite(image)
+            sprite.scale = self.tile / image.width
+            sprites.append(sprite)
+        return sprites
+
     def _place_pacman(self) -> None:
         col, row = self.game.player.visual_position()
         self.pacman.x, self.pacman.y = self._tile_center(col, row)
 
+    def _place_ghosts(self) -> None:
+        for ghost, sprite in zip(self.game.ghosts, self.ghosts):
+            col, row = ghost.visual_position()
+            sprite.x, sprite.y = self._tile_center(col, row)
+
     def _tile_center(self, col: float, row: float) -> tuple[float, float]:
         left = (constants.WINDOW_WIDTH - self.image_width) // 2
         bottom = (constants.WINDOW_HEIGHT - self.image_height) // 2
-        x = left + (col + 0.5) * self.tile
-        y = bottom + (self.rows - row - 0.5) * self.tile
+        x = left + round(col * self.tile) + self.tile / 2
+        y = bottom + round((self.rows - row - 1) * self.tile) + self.tile / 2
         return x, y
 
     def _paint_rounded_square(
@@ -215,6 +233,8 @@ class GameView(View):
             self.pacman.face(direction)
             self.pacman.animate(dt)
 
+        self._place_ghosts()
+
     def draw(self) -> None:
         self.maze.draw()
         for corr, supergum in self.supergums.items():
@@ -222,6 +242,9 @@ class GameView(View):
                 supergum.draw()
         self.pacman.draw()
         self._draw_infos()
+
+        for ghost in self.ghosts:
+            ghost.draw()
 
     def key_handler(self, symbol: int) -> View | None:
         if symbol in (key.UP, key.W, key.K):
