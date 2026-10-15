@@ -21,7 +21,7 @@ class Game:
     PLAYER_SPEED: float = 5.0
     GHOST_SPEED: float = 2.5  # level 1: half the player speed
     GHOST_UP: float = 0.27  # per level half the player / max_level + 10%
-    TIME_PER_GUM: float = 0.30  # it's a guess maybe change later
+    TIME_PER_GUM: float = 1  # it's a guess maybe change later
     TIME_DECAY: float = 0.90  # time decrease by 10% in each level
 
     def __init__(self, config: dict[str, Any]) -> None:

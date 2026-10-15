@@ -1,5 +1,5 @@
-from typing import Any
 import json
+from typing import Any
 
 
 class Parser:
@@ -16,7 +16,7 @@ class Parser:
         "points_per_pacgum": (1, 100000),
         "points_per_super_pacgum": (1, 100000),
         "points_per_ghost": (1, 100000),
-        "level": (14, 50),
+        "level": (5, 50),
     }
 
     def __init__(self, path: str) -> None:

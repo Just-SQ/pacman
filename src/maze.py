@@ -39,7 +39,7 @@ class Board:
             (1, 1),
             (2 * self.width - 1, 2 * self.height - 1),
             (2 * self.width - 1, 1),
-            (1, 2 * self.height - 1)
+            (1, 2 * self.height - 1),
         }
 
     def pacman_spawn(self) -> tuple[int, int]:
