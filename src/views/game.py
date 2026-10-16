@@ -87,7 +87,12 @@ class GameView(View):
             )
         )
 
+        self.ready_title: list[pyglet.text.Label] = self.make_title(
+            "Ready!", constants.WINDOW_HEIGHT // 2, 52
+        )
+
     def _build_maze(self) -> None:
+        self.ready_time: float = 2
         self.board: Board = self.game.board
         self.cols: int = len(self.board.grid[0])
         self.rows: int = len(self.board.grid)
@@ -272,7 +277,7 @@ class GameView(View):
         self.life_info_icon.x = (
             constants.WINDOW_WIDTH
             - constants.INFO_WIDTH // 2
-            - (self.infos["lives_val"].content_width // 1.8)
+            - (self.infos["lives_val"].content_width // 1.6)
         )
         self.life_info_icon.draw()
 
@@ -280,7 +285,11 @@ class GameView(View):
         if self.paused:
             return
 
-        self.game.update(constants.FPS)
+        if self.ready_time > 0:
+            self.ready_time -= dt
+        else:
+            self.game.update(constants.FPS)
+
         if self.board is not self.game.board:
             self._build_maze()
         self._erase_eaten_gums()
@@ -311,7 +320,22 @@ class GameView(View):
             for pause_hint in self.pause_hints:
                 pause_hint.draw()
 
+        if self.ready_time > 0 and not self.paused:
+            self.pause_shade.draw()
+            for layer in self.ready_title:
+                layer.draw()
+
     def key_handler(self, symbol: int) -> View | None:
+        if symbol == key.P:
+            self.paused = not self.paused
+        if symbol == key.ESCAPE:
+            if self.paused:
+                return self.menu_view
+            self.paused = True
+
+        if self.paused or self.ready_time > 0:
+            return None
+
         if symbol in (key.UP, key.W, key.K):
             self.game.player.dir_wanted = Direction.UP
         if symbol in (key.DOWN, key.S, key.J):
@@ -320,8 +344,6 @@ class GameView(View):
             self.game.player.dir_wanted = Direction.LEFT
         if symbol in (key.RIGHT, key.D, key.L):
             self.game.player.dir_wanted = Direction.RIGHT
-        if symbol == key.P:
-            self.paused = not self.paused
         if symbol == key.I:
             self.game.invicible = not self.game.invicible
             self.pacman.opacity = 100 if self.game.invicible else 255
@@ -330,8 +352,4 @@ class GameView(View):
             self.game.sup_gums.clear()
         if symbol == key.E:
             self.game.lives += 1
-        if symbol == key.ESCAPE:
-            if self.paused:
-                return self.menu_view
-            self.paused = True
         return None
