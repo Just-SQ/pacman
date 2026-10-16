@@ -25,6 +25,8 @@ class GameView(View):
         right = constants.WINDOW_WIDTH - left
         top = constants.WINDOW_HEIGHT - 60
         bottom = 60
+        self.life_info_icon: Pacman = Pacman(2.5)
+        self.life_info_icon.image = self.life_info_icon.frames[2]
         self.infos: dict[str, pyglet.text.Label] = {
             "score": self.make_label("SCORE", 20, top, left),
             "score_val": self.make_label(
@@ -35,15 +37,24 @@ class GameView(View):
                 "0", 18, top - 48, right, constants.YELLOW
             ),
             "lives": self.make_label("LIVES", 20, bottom + 48, right),
+            "lives_val": self.make_label(
+                f"x{self.game.lives}",
+                18,
+                bottom,
+                int(right + self.life_info_icon.width // 2),
+                constants.YELLOW,
+            ),
             "level": self.make_label("LEVEL", 20, bottom + 48, left),
             "level_val": self.make_label(
                 str(self.game.level), 18, bottom, left, constants.YELLOW
             ),
         }
-        self.life_info_icon: Pacman = Pacman(self.tile / 13)
-        self.life_info_icon.image = self.life_info_icon.frames[2]
         self.life_info_icon.y = bottom
-        self.life_info_icon_x: int = constants.WINDOW_WIDTH - left - 38
+        self.life_info_icon_x: float = (
+            constants.WINDOW_WIDTH
+            - left
+            - (self.infos["lives_val"].content_width // 1.8)
+        )
 
         self.ghost_images: list[pyglet.image.AbstractImage] = [
             self._load_image(f"ghost_{n}") for n in range(4)
@@ -233,14 +244,13 @@ class GameView(View):
         self.infos["score_val"].text = str(self.game.score)
         self.infos["time_val"].text = str(int(self.game.time_left))
         self.infos["level_val"].text = str(self.game.level)
+        self.infos["lives_val"].text = f"x{self.game.lives}"
 
         for info in self.infos.values():
             info.draw()
 
         self.life_info_icon.x = self.life_info_icon_x
-        for _ in range(self.game.lives):
-            self.life_info_icon.draw()
-            self.life_info_icon.x += 38
+        self.life_info_icon.draw()
 
     def update(self, dt: float) -> None:
         self.game.update(constants.FPS)

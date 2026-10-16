@@ -8,7 +8,6 @@ from src import constants
 from .views import View
 from .views.menu import MenuView
 
-
 pyglet.image.Texture.default_min_filter = GL_NEAREST
 pyglet.image.Texture.default_mag_filter = GL_NEAREST
 
