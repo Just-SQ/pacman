@@ -50,11 +50,6 @@ class GameView(View):
             ),
         }
         self.life_info_icon.y = bottom
-        self.life_info_icon_x: float = (
-            constants.WINDOW_WIDTH
-            - left
-            - (self.infos["lives_val"].content_width // 1.8)
-        )
 
         self.ghost_images: list[pyglet.image.AbstractImage] = [
             self._load_image(f"ghost_{n}") for n in range(4)
@@ -265,7 +260,11 @@ class GameView(View):
         for info in self.infos.values():
             info.draw()
 
-        self.life_info_icon.x = self.life_info_icon_x
+        self.life_info_icon.x = (
+            constants.WINDOW_WIDTH
+            - constants.INFO_WIDTH // 2
+            - (self.infos["lives_val"].content_width // 1.8)
+        )
         self.life_info_icon.draw()
 
     def update(self, dt: float) -> None:
@@ -316,6 +315,8 @@ class GameView(View):
         if symbol == key.I:
             self.game.invicible = not self.game.invicible
             self.pacman.opacity = 100 if self.game.invicible else 255
+        if symbol == key.E:
+            self.game.lives += 1
         if symbol == key.ESCAPE:
             if self.paused:
                 return self.menu_view
