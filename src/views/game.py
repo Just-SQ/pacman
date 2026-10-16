@@ -66,12 +66,21 @@ class GameView(View):
         self.pause_title: list[pyglet.text.Label] = self.make_title(
             "PAUSED", constants.WINDOW_HEIGHT // 2, 64
         )
-        self.pause_hint: pyglet.text.Label = self.make_label(
-            "p to resume, esc for main menu",
-            14,
-            constants.WINDOW_HEIGHT // 2 - 80,
-            color=constants.GREY,
-        )
+        pause_hints = [
+            "P to resume",
+            "Esc for main menu",
+            "Arrows, WASD or HJKL to move",
+            "I for invincibility, N to skip level, E for extra life",
+        ]
+        self.pause_hints: list[pyglet.text.Label] = [
+            self.make_label(
+                pause_hint,
+                12,
+                constants.WINDOW_HEIGHT // 2 - (80 + 34 * i),
+                color=constants.GREY,
+            )
+            for i, pause_hint in enumerate(pause_hints)
+        ]
         self.pause_shade: pyglet.sprite.Sprite = pyglet.sprite.Sprite(
             pyglet.image.SolidColorImagePattern((0, 0, 0, 170)).create_image(
                 constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT
@@ -299,7 +308,8 @@ class GameView(View):
             self.pause_shade.draw()
             for layer in self.pause_title:
                 layer.draw()
-            self.pause_hint.draw()
+            for pause_hint in self.pause_hints:
+                pause_hint.draw()
 
     def key_handler(self, symbol: int) -> View | None:
         if symbol in (key.UP, key.W, key.K):
@@ -315,6 +325,9 @@ class GameView(View):
         if symbol == key.I:
             self.game.invicible = not self.game.invicible
             self.pacman.opacity = 100 if self.game.invicible else 255
+        if symbol == key.N:
+            self.game.pacgums.clear()
+            self.game.sup_gums.clear()
         if symbol == key.E:
             self.game.lives += 1
         if symbol == key.ESCAPE:
