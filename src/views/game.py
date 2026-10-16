@@ -67,6 +67,22 @@ class GameView(View):
         )
         self.ghosts: list[pyglet.sprite.Sprite] = self._make_ghosts()
 
+        self.paused: bool = False
+        self.pause_title: list[pyglet.text.Label] = self.make_title(
+            "PAUSED", constants.WINDOW_HEIGHT // 2, 64
+        )
+        self.pause_hint: pyglet.text.Label = self.make_label(
+            "p to resume, esc for main menu",
+            14,
+            constants.WINDOW_HEIGHT // 2 - 80,
+            color=constants.GREY,
+        )
+        self.pause_shade: pyglet.sprite.Sprite = pyglet.sprite.Sprite(
+            pyglet.image.SolidColorImagePattern((0, 0, 0, 170)).create_image(
+                constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT
+            )
+        )
+
     def _build_maze(self) -> None:
         self.board: Board = self.game.board
         self.cols: int = len(self.board.grid[0])
@@ -253,6 +269,9 @@ class GameView(View):
         self.life_info_icon.draw()
 
     def update(self, dt: float) -> None:
+        if self.paused:
+            return
+
         self.game.update(constants.FPS)
         if self.board is not self.game.board:
             self._build_maze()
@@ -277,6 +296,12 @@ class GameView(View):
         for ghost in self.ghosts:
             ghost.draw()
 
+        if self.paused:
+            self.pause_shade.draw()
+            for layer in self.pause_title:
+                layer.draw()
+            self.pause_hint.draw()
+
     def key_handler(self, symbol: int) -> View | None:
         if symbol in (key.UP, key.W, key.K):
             self.game.player.dir_wanted = Direction.UP
@@ -286,6 +311,10 @@ class GameView(View):
             self.game.player.dir_wanted = Direction.LEFT
         if symbol in (key.RIGHT, key.D, key.L):
             self.game.player.dir_wanted = Direction.RIGHT
+        if symbol == key.P:
+            self.paused = not self.paused
         if symbol == key.ESCAPE:
-            return self.menu_view
+            if self.paused:
+                return self.menu_view
+            self.paused = True
         return None
