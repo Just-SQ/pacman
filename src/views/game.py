@@ -313,6 +313,9 @@ class GameView(View):
             self.game.player.dir_wanted = Direction.RIGHT
         if symbol == key.P:
             self.paused = not self.paused
+        if symbol == key.I:
+            self.game.invicible = not self.game.invicible
+            self.pacman.opacity = 100 if self.game.invicible else 255
         if symbol == key.ESCAPE:
             if self.paused:
                 return self.menu_view
