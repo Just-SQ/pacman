@@ -215,18 +215,25 @@ class GameView(View):
         self.pacman.x, self.pacman.y = self._tile_center(col, row)
 
     def _place_ghosts(self) -> None:
-        blink = (
+        frightened_blink = (
             self.game.power_time < 3 and int(self.game.power_time * 2) % 2 == 1
         )
         for ghost, sprite in zip(self.game.ghosts, self.ghosts):
             col, row = ghost.visual_position()
             sprite.x, sprite.y = self._tile_center(col, row)
+            sprite.visible = True
             if ghost.mode is GhostMode.FRIGHTENED:
                 sprite.image = self.scared_image
-                if blink:
+                if frightened_blink:
                     sprite.image = self.ghost_images[ghost.g_id]
             elif ghost.mode is GhostMode.EATEN:
                 sprite.image = self.eyes_image
+                eaten_blink = (
+                    ghost.respawn_timer < 3
+                    and int(ghost.respawn_timer * 2) % 2 == 1
+                )
+                if eaten_blink:
+                    sprite.visible = False
             else:
                 sprite.image = self.ghost_images[ghost.g_id]
 
@@ -273,7 +280,7 @@ class GameView(View):
     def _draw_infos(self) -> None:
         self.infos["score_val"].text = str(self.game.score)
         self.infos["time_val"].text = time.strftime(
-            "%M:%S", time.gmtime(self.game.time_left)
+            "%M:%S", time.gmtime(max(0, self.game.time_left))
         )
         self.infos["level_val"].text = str(self.game.level)
         self.infos["lives_val"].text = f"x{self.game.lives}"
@@ -297,7 +304,7 @@ class GameView(View):
             self.ready_time -= dt
         else:
             self.game.update(constants.FPS)
-        if self.game.lives < lives:
+        if 0 < self.game.lives < lives:
             self.ready_time = 2
 
         if self.board is not self.game.board:
