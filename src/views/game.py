@@ -1,3 +1,4 @@
+import time
 from typing import Any
 
 import pyglet
@@ -28,15 +29,15 @@ class GameView(View):
         self.life_info_icon: Pacman = Pacman(2.5)
         self.life_info_icon.image = self.life_info_icon.frames[2]
         self.infos: dict[str, pyglet.text.Label] = {
-            "score": self.make_label("SCORE", 20, top, left),
+            "score": self.make_label("SCORE", 22, top, left),
             "score_val": self.make_label(
                 "0", 18, top - 48, left, constants.YELLOW
             ),
-            "time": self.make_label("TIME", 20, top, right),
+            "time": self.make_label("TIMER", 22, top, right),
             "time_val": self.make_label(
-                "0", 18, top - 48, right, constants.YELLOW
+                "0", 18, top - 48, right + 2, constants.YELLOW
             ),
-            "lives": self.make_label("LIVES", 20, bottom + 48, right),
+            "lives": self.make_label("LIVES", 22, bottom + 48, right),
             "lives_val": self.make_label(
                 f"x{self.game.lives}",
                 18,
@@ -44,7 +45,7 @@ class GameView(View):
                 int(right + self.life_info_icon.width // 2),
                 constants.YELLOW,
             ),
-            "level": self.make_label("LEVEL", 20, bottom + 48, left),
+            "level": self.make_label("LEVEL", 22, bottom + 48, left),
             "level_val": self.make_label(
                 str(self.game.level), 18, bottom, left, constants.YELLOW
             ),
@@ -108,12 +109,11 @@ class GameView(View):
         )
 
         wall_size = round(self.tile * 0.4)
-        gap = round(wall_size * 0.4)
 
         self.gums_on_screen: set[tuple[int, int]] = set(self.game.pacgums)
 
         self._paint_walls(wall_size, constants.BLUE)
-        self._paint_walls(gap, constants.TRANSPARENT_BLUE)
+        self._paint_walls(round(wall_size * 0.4), constants.TRANSPARENT_BLUE)
         self._paint_gums()
 
         self.maze_image: pyglet.image.ImageData = pyglet.image.ImageData(
@@ -215,11 +215,16 @@ class GameView(View):
         self.pacman.x, self.pacman.y = self._tile_center(col, row)
 
     def _place_ghosts(self) -> None:
+        blink = (
+            self.game.power_time < 3 and int(self.game.power_time * 2) % 2 == 1
+        )
         for ghost, sprite in zip(self.game.ghosts, self.ghosts):
             col, row = ghost.visual_position()
             sprite.x, sprite.y = self._tile_center(col, row)
             if ghost.mode is GhostMode.FRIGHTENED:
                 sprite.image = self.scared_image
+                if blink:
+                    sprite.image = self.ghost_images[ghost.g_id]
             elif ghost.mode is GhostMode.EATEN:
                 sprite.image = self.eyes_image
             else:
@@ -267,7 +272,9 @@ class GameView(View):
 
     def _draw_infos(self) -> None:
         self.infos["score_val"].text = str(self.game.score)
-        self.infos["time_val"].text = str(int(self.game.time_left))
+        self.infos["time_val"].text = time.strftime(
+            "%M:%S", time.gmtime(self.game.time_left)
+        )
         self.infos["level_val"].text = str(self.game.level)
         self.infos["lives_val"].text = f"x{self.game.lives}"
 
@@ -285,10 +292,13 @@ class GameView(View):
         if self.paused:
             return
 
+        lives = self.game.lives
         if self.ready_time > 0:
             self.ready_time -= dt
         else:
             self.game.update(constants.FPS)
+        if self.game.lives < lives:
+            self.ready_time = 2
 
         if self.board is not self.game.board:
             self._build_maze()
@@ -332,7 +342,6 @@ class GameView(View):
             if self.paused:
                 return self.menu_view
             self.paused = True
-
         if self.paused or self.ready_time > 0:
             return None
 
