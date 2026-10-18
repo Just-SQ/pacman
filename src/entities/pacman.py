@@ -27,7 +27,7 @@ class Pacman(pyglet.sprite.Sprite):
 
     def animate(self, dt: float) -> None:
         self.chomp_timer += dt
-        if self.chomp_timer >= 0.05:
+        if self.chomp_timer >= 0.1:
             self.chomp_timer = 0.0
             self.chomp_step = (self.chomp_step + 1) % len(self.CHOMP)
             self.image = self.frames[self.CHOMP[self.chomp_step]]

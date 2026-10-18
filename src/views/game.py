@@ -68,8 +68,7 @@ class GameView(View):
             "PAUSED", constants.WINDOW_HEIGHT // 2, 64
         )
         pause_hints = [
-            "P to resume",
-            "Esc for main menu",
+            "Q for main menu",
             "Arrows, WASD or HJKL to move",
             "I for invincibility, N to skip level, E for extra life",
         ]
@@ -343,12 +342,10 @@ class GameView(View):
                 layer.draw()
 
     def key_handler(self, symbol: int) -> View | None:
-        if symbol == key.P:
-            self.paused = not self.paused
+        if symbol == key.Q and self.paused:
+            return self.menu_view
         if symbol == key.ESCAPE:
-            if self.paused:
-                return self.menu_view
-            self.paused = True
+            self.paused = not self.paused
         if self.paused or self.ready_time > 0:
             return None
 

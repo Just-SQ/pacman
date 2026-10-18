@@ -99,8 +99,6 @@ class MenuView(View):
         self.hint.draw()
 
     def key_handler(self, symbol: int) -> View | None:
-        if symbol == key.ESCAPE:
-            pyglet.app.exit()
         if symbol in (key.UP, key.W, key.K):
             self.selected_option = (self.selected_option - 1) % len(
                 self.OPTIONS

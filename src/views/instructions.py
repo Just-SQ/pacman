@@ -21,7 +21,7 @@ class InstructionsView(View):
         )
         lines = [
             "Move: arrow keys, WASD, or HJKL",
-            "Pause: P or Esc",
+            "Pause: Esc (then Q for main menu)",
             "Cheat: I(=invincibility), N(=next level), E(=extra life)",
             "Eat every pacgum to clear the level",
             "Touching a ghost costs one life",
