@@ -36,7 +36,17 @@ class Ghost(Entity):
             self.respawn_timer = self.RESPAWN_DELAY
 
     def set_target(self, player: Player) -> None:
-        self.target = (player.x, player.y)
+        # self.target = (player.x, player.y)
+        px, py = player.x, player.y
+        match self.g_id:
+            case 0:
+                self.target = (px, py)
+            case 1:
+                self.target = (px + 2, py + 2)
+            case 2:
+                self.target = (px + 4, py + 4)
+            case 3:
+                self.target = (px + 8, py + 8)
 
     def reset(self) -> None:
         super().reset()
@@ -59,7 +69,7 @@ class Ghost(Entity):
         if not options:  # dead end must turn back
             options = [d for d in self.MOVES if self._can_move(d)]
         if self.mode is GhostMode.FRIGHTENED:
-            self.direction = random.choice(options)
+            self.direction = max([d for d in self.MOVES if self._can_move(d)], key=self._distance)
         else:
             self.direction = min(options, key=self._distance)
 
