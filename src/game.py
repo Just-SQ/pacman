@@ -107,6 +107,7 @@ class Game:
             if ghost.mode is GhostMode.FRIGHTENED:
                 self.score += self.config["points_per_ghost"]
                 ghost.set_mode(GhostMode.EATEN)
+                ghost.x, ghost.y = ghost.spawn
             elif not self.invicible:
                 self._lose_life()
                 return
@@ -128,5 +129,5 @@ class Game:
             self.state = State.VICTORY
         else:
             self.level += 1
-            self.state = State.LEVEL_WON
+            # self.state = State.LEVEL_WON
             self.load_level()

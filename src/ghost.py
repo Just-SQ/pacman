@@ -1,4 +1,3 @@
-import random
 from enum import Enum, auto
 
 from .maze import Board
@@ -30,14 +29,18 @@ class Ghost(Entity):
         self.g_id: int = g_id
 
     def set_mode(self, mode: GhostMode) -> None:
+        if self.mode is GhostMode.CHASE and mode is GhostMode.FRIGHTENED:
+            self._reverse()
         self.mode = mode
         self.speed = self.base_speed * self.SPEED_MOVE.get(mode, 0)
         if mode is GhostMode.EATEN:
             self.respawn_timer = self.RESPAWN_DELAY
 
     def set_target(self, player: Player) -> None:
-        # self.target = (player.x, player.y)
         px, py = player.x, player.y
+        if self.mode is GhostMode.FRIGHTENED:
+            self.target = (px, py)
+            return
         match self.g_id:
             case 0:
                 self.target = (px, py)
@@ -69,9 +72,18 @@ class Ghost(Entity):
         if not options:  # dead end must turn back
             options = [d for d in self.MOVES if self._can_move(d)]
         if self.mode is GhostMode.FRIGHTENED:
-            self.direction = max([d for d in self.MOVES if self._can_move(d)], key=self._distance)
+            self.direction = max(options, key=self._distance)
+            if self.next_tile == self.target:
+                self._reverse()
         else:
             self.direction = min(options, key=self._distance)
+
+    def _reverse(self) -> None:
+        if self.direction is Direction.NONE:
+            return
+        self.x, self.y = self.next_tile
+        self.direction = self.OPPOSITE[self.direction]
+        self.progress = 1.0 - self.progress
 
     def _distance(self, direction: Direction) -> float:
         dx, dy = direction.value
