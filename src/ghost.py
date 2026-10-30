@@ -15,9 +15,9 @@ class GhostMode(Enum):
 class Ghost(Entity):
     RESPAWN_DELAY: float = 10.0
     SPEED_MOVE: dict[GhostMode, float] = {
-        GhostMode.CHASE: 1,
-        GhostMode.FRIGHTENED: 0.5,
-        GhostMode.EATEN: 3
+        GhostMode.CHASE: 0.8,
+        GhostMode.FRIGHTENED: 0.6,
+        GhostMode.EATEN: 2
     }
 
     def __init__(
@@ -40,19 +40,19 @@ class Ghost(Entity):
 
     def set_target(self, player: Player) -> None:
         px, py = player.x, player.y
-        # if self.mode is GhostMode.FRIGHTENED:
-        #     self.target = (px, py)
-        #     return
-        # match self.g_id:
-        #     case 0:
-        #         self.target = (px, py)
-        #     case 1:
-        #         self.target = (px + 2, py + 2)
-        #     case 2:
-        #         self.target = (px + 4, py + 4)
-        #     case 3:
-        #         self.target = (px + 8, py + 8)
-        self.player_map: dict[tuple[int, int], int] = self._distance_from((px, py))
+        if self.mode is GhostMode.FRIGHTENED:
+            self.target = (px, py)
+            return
+        match self.g_id:
+            case 0:
+                self.target = (px, py)
+            case 1:
+                self.target = (px + 1, py + 1) if self.board.is_walkable((px + 1, py + 1)) else (px, py)
+            case 2:
+                self.target = (px + 2, py + 2) if self.board.is_walkable((px + 2, py + 2)) else (px, py)
+            case 3:
+                self.target = (px + 3, py + 3) if self.board.is_walkable((px + 3, py + 3)) else (px, py)
+        self.player_map: dict[tuple[int, int], int] = self._distance_from(self.target)
         self.spawn_map: dict[tuple[int, int], int] = self._distance_from(self.spawn)
 
 
@@ -81,7 +81,6 @@ class Ghost(Entity):
             if self.next_tile == self.target:
                 self._reverse()
         elif self.mode is GhostMode.EATEN:
-        #     self.direction = self.bfs(self.spawn, (self.x, self.y))
             if (self.x, self.y) == self.spawn:
                 self.direction = Direction.NONE
             else:
@@ -98,51 +97,9 @@ class Ghost(Entity):
 
     def _distance(self, direction: Direction) -> float:
         dx, dy = direction.value
-        # nx, ny = self.x + dx, self.y + dy
-        # tx, ty = self.target
         if self.mode is GhostMode.EATEN:
             return self.spawn_map[(self.x + dx, self.y + dy)]
         return self.player_map[(self.x + dx, self.y + dy)]
-
-    # def bfs(self, target: tuple[int, int], start: tuple[int, int]) -> Direction | None:
-    #     if target == start:
-    #         return Direction.NONE
-
-    #     seen: list[list[bool]] = [
-    #         [False for _ in range(self.board.width * 2 + 1)]
-    #         for _ in range(self.board.height * 2 + 1)]
-    #     q: list[tuple[int, int]] = [start]
-    #     parent: dict[tuple[int, int], tuple[int, int]] = {}
-    #     x, y = start
-    #     seen[y][x] = True
-
-    #     while q:
-    #         current: tuple[int, int] = q.pop(0)
-    #         x, y = current
-    #         neighbors: list[tuple[int, int]] = self._neighbors(current)
-    #         for neighbor in neighbors:
-    #             nx, ny = neighbor
-    #             if not seen[ny][nx]:
-    #                 q.append(neighbor)
-    #                 seen[ny][nx] = True
-    #                 parent[neighbor] = current
-    #         if current == target:
-    #             break
-
-    #     min_path: list[tuple[int, int]] = [target]
-    #     previous: tuple[int, int] = parent[target]
-    #     min_path.append(previous)
-    #     while previous != start:
-    #         previous = parent[previous]
-    #         min_path.append(previous)
-        
-    #     min_path = min_path[::-1]
-    #     sx, sy = start
-    #     nx, ny = min_path[1]
-    #     dx, dy = nx - sx, ny - sy
-    #     for  d in self.MOVES:
-    #         if d.value == (dx, dy):
-    #             return d
 
     def _distance_from(self, start: tuple[int, int]) -> dict[tuple[int, int], int]:
         dist: dict[tuple[int, int], int] = {start: 0}
