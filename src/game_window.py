@@ -25,7 +25,9 @@ class GameWindow(pyglet.window.Window):
         self.settings: dict[str, Any] = settings
 
     def update(self, dt: float) -> None:
-        self.current_view.update(dt)
+        next_view = self.current_view.update(dt)
+        if next_view is not None:
+            self.current_view = next_view
 
     def on_draw(self) -> None:
         self.clear()

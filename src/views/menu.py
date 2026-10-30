@@ -1,3 +1,4 @@
+import random
 from typing import Any
 
 import pyglet
@@ -9,6 +10,7 @@ from src.views import View
 from src.views.credit import CreditView
 from src.views.game import GameView
 from src.views.instructions import InstructionsView
+from src.views.leaderboard import LeaderboardView
 
 
 class MenuView(View):
@@ -18,6 +20,11 @@ class MenuView(View):
         "Instructions",
         "Credit",
         "Exit",
+    )
+    TAGLINES: tuple[str, ...] = (
+        "ooh! ghost fight!",
+        "skcus iqasa!",
+        "skcus irdakr!",
     )
 
     def __init__(self, settings: dict[str, Any]) -> None:
@@ -29,7 +36,10 @@ class MenuView(View):
             y=0,
         )
         self.tagline: pyglet.text.Label = self.make_label(
-            "ghosts! skcus iqasA!", 24, y=882, color=constants.YELLOW
+            random.choice(self.TAGLINES),
+            24,
+            y=882,
+            color=constants.YELLOW,
         )
         self.title: list[pyglet.text.Label] = self.make_title(
             "PAC-MAN", size=96, y=768
@@ -119,6 +129,8 @@ class MenuView(View):
 
         if choice == "Start Game":
             return GameView(self, self.settings)
+        if choice == "Leaderboard":
+            return LeaderboardView(self)
         if choice == "Credit":
             return CreditView(self)
         if choice == "Instructions":

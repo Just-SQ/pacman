@@ -6,11 +6,11 @@ from pyglet.window import key
 
 from src import constants, types
 from src.entities.pacman import Pacman
-from src.game import Game
+from src.game import Game, State
 from src.ghost import GhostMode
 from src.maze import Board
 from src.utils.entity import Direction
-from src.views import View
+from src.views import View, view
 
 
 class GameView(View):
@@ -294,9 +294,15 @@ class GameView(View):
         )
         self.life_info_icon.draw()
 
-    def update(self, dt: float) -> None:
+    def update(self, dt: float) -> View | None:
         if self.paused:
             return
+
+        if (
+            self.game.state is State.VICTORY
+            or self.game.state is State.GAME_OVER
+        ):
+            return self.menu_view
 
         lives = self.game.lives
         if self.ready_time > 0:
