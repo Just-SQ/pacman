@@ -77,6 +77,12 @@ class Game:
         self.player.update(fps)
         for ghost in self.ghosts:
             ghost.set_target(self.player)
+            ghost.taken = {
+                tile
+                for other in self.ghosts
+                if other is not ghost and ghost.mode is not GhostMode.EATEN
+                for tile in ((other.x, other.y), other.next_tile)
+            }
             ghost.update(fps)
 
         self._eat_gums()
