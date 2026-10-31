@@ -1,5 +1,7 @@
 {
     "reportImplicitOverride": false,
     "reportAny": false,
-    "reportExplicitAny": false
+    "reportExplicitAny": false,
+    "reportUnreachable": false,
+    "reportUnnecessaryIsInstance": false
 }
