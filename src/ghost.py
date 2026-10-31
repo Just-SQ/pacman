@@ -15,8 +15,8 @@ class GhostMode(Enum):
 class Ghost(Entity):
     RESPAWN_DELAY: float = 10.0
     SPEED_MOVE: dict[GhostMode, float] = {
-        GhostMode.CHASE: 0.8,
-        GhostMode.FRIGHTENED: 0.6,
+        GhostMode.CHASE: 1,
+        GhostMode.FRIGHTENED: 0.7,
         GhostMode.EATEN: 2
     }
 
@@ -30,6 +30,8 @@ class Ghost(Entity):
         self.target: tuple[int, int] = spawn
         self.g_id: int = g_id
         self.taken: set[tuple[int, int]] = set()
+        self.spawn_map: dict[tuple[int, int], int] = self._distance_from(spawn)
+        self.current_target: tuple[int, int] | None = None
 
     def set_mode(self, mode: GhostMode) -> None:
         if self.mode is GhostMode.CHASE and mode is GhostMode.FRIGHTENED:
@@ -48,13 +50,14 @@ class Ghost(Entity):
             case 0:
                 self.target = (px, py)
             case 1:
-                self.target = (px + 1, py + 1) if self.board.is_walkable((px + 1, py + 1)) else (px, py)
+                self.target = (px + 2, py) if self.board.is_walkable((px + 2, py)) else (px, py)
             case 2:
-                self.target = (px + 2, py + 2) if self.board.is_walkable((px + 2, py + 2)) else (px, py)
+                self.target = (px, py + 2) if self.board.is_walkable((px, py + 2)) else (px, py)
             case 3:
-                self.target = (px + 3, py + 3) if self.board.is_walkable((px + 3, py + 3)) else (px, py)
-        self.player_map: dict[tuple[int, int], int] = self._distance_from(self.target)
-        self.spawn_map: dict[tuple[int, int], int] = self._distance_from(self.spawn)
+                self.target = (px - 4, py - 4) if self.board.is_walkable((px - 4, py - 4)) else (px, py)
+        if self.current_target != self.target:
+            self.player_map: dict[tuple[int, int], int] = self._distance_from(self.target)
+            self.current_target = self.target
 
 
     def reset(self) -> None:
