@@ -16,7 +16,7 @@ class State(Enum):
 
 
 class Game:
-    POWER_DURATION: float = 10.0
+    # POWER_DURATION: float = 10.0
     MAX_LEVEL: int = 10
     PLAYER_SPEED: float = 7.0
     GHOST_SPEED: float = 5  # level 1: half the player speed
@@ -55,6 +55,7 @@ class Game:
             * self.TIME_DECAY ** (self.level - 1)
         )
         self.power_time: float = 0.0
+        self.POWER_DURATION: float = min(30, len(self.pacgums) * 0.04)
 
     def update(self, fps: int) -> None:
         if self.state is not State.RUNNING:

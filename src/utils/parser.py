@@ -5,8 +5,8 @@ from typing import Any
 class Parser:
     DEFAULT_CONFIG: dict[str, Any] = {
         "highscore_filename": "top_scores.txt",
-        "level": (20, 20),
-        "lives": 3,
+        "level": (9, 9),
+        "lives": 10,
         "points_per_pacgum": 5,
         "points_per_super_pacgum": 100,
         "points_per_ghost": 500,

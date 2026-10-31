@@ -16,7 +16,7 @@ class Ghost(Entity):
     SPEED_MOVE: dict[GhostMode, float] = {
         GhostMode.CHASE: 1,
         GhostMode.FRIGHTENED: 0.7,
-        GhostMode.EATEN: 2
+        GhostMode.EATEN: 2,
     }
 
     def __init__(
@@ -32,7 +32,7 @@ class Ghost(Entity):
         self.taken: set[tuple[int, int]] = set()
         self.spawn_map: dict[tuple[int, int], int] = self._distance_from(spawn)
         self.current_target: tuple[int, int] | None = None
-        self.RADIOUS: int = 5
+        self.RADIOUS: int = 7
 
     def set_mode(self, mode: GhostMode) -> None:
         if self.mode is GhostMode.CHASE and mode is GhostMode.FRIGHTENED:
@@ -48,17 +48,30 @@ class Ghost(Entity):
             case 0:
                 self.target = (px, py)
             case 1:
-                self.target = (px + 2, py) if self.board.is_walkable((px + 2, py)) else (px, py)
+                self.target = (
+                    (px + 2, py)
+                    if self.board.is_walkable((px + 2, py))
+                    else (px, py)
+                )
             case 2:
-                self.target = (px, py + 2) if self.board.is_walkable((px, py + 2)) else (px, py)
+                self.target = (
+                    (px, py + 2)
+                    if self.board.is_walkable((px, py + 2))
+                    else (px, py)
+                )
             case 3:
-                self.target = (px - 4, py - 4) if self.board.is_walkable((px - 4, py - 4)) else (px, py)
+                self.target = (
+                    (px - 4, py - 4)
+                    if self.board.is_walkable((px - 4, py - 4))
+                    else (px, py)
+                )
         if self.mode is GhostMode.FRIGHTENED:
             self.target = (px, py)
         if self.current_target != self.target:
-            self.player_map: dict[tuple[int, int], int] = self._distance_from(self.target)
+            self.player_map: dict[tuple[int, int], int] = self._distance_from(
+                self.target
+            )
             self.current_target = self.target
-
 
     def reset(self) -> None:
         super().reset()
@@ -86,7 +99,8 @@ class Ghost(Entity):
             options = [d for d in self.MOVES if self._can_move(d)]
         if self.mode is not GhostMode.EATEN:
             free: list[Direction] = [
-                d for d in options
+                d
+                for d in options
                 if (self.x + d.value[0], self.y + d.value[1]) not in self.taken
             ]
             if free:
@@ -116,7 +130,9 @@ class Ghost(Entity):
             return self.spawn_map[(self.x + dx, self.y + dy)]
         return self.player_map[(self.x + dx, self.y + dy)]
 
-    def _distance_from(self, start: tuple[int, int]) -> dict[tuple[int, int], int]:
+    def _distance_from(
+        self, start: tuple[int, int]
+    ) -> dict[tuple[int, int], int]:
         dist: dict[tuple[int, int], int] = {start: 0}
         q: list[tuple[int, int]] = [start]
 
@@ -138,4 +154,3 @@ class Ghost(Entity):
             if self.board.is_walkable((nx, ny)):
                 neighbors.append((nx, ny))
         return neighbors
-
