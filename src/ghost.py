@@ -1,5 +1,4 @@
 from enum import Enum, auto
-from src.utils.entity import Direction
 
 from .maze import Board
 from .player import Player
@@ -15,8 +14,8 @@ class GhostMode(Enum):
 class Ghost(Entity):
     RESPAWN_DELAY: float = 10.0
     SPEED_MOVE: dict[GhostMode, float] = {
-        GhostMode.CHASE: 1,
-        GhostMode.FRIGHTENED: 0.7,
+        GhostMode.CHASE: 0.95,
+        GhostMode.FRIGHTENED: 0.6,
         GhostMode.EATEN: 2
     }
 
@@ -26,6 +25,7 @@ class Ghost(Entity):
         super().__init__(spawn, speed, board)
         self.base_speed: float = speed
         self.mode: GhostMode = GhostMode.CHASE
+        self.set_mode(GhostMode.CHASE)
         self.respawn_timer: float = 0.0
         self.target: tuple[int, int] = spawn
         self.g_id: int = g_id
@@ -43,9 +43,6 @@ class Ghost(Entity):
 
     def set_target(self, player: Player) -> None:
         px, py = player.x, player.y
-        if self.mode is GhostMode.FRIGHTENED:
-            self.target = (px, py)
-            return
         match self.g_id:
             case 0:
                 self.target = (px, py)
@@ -55,6 +52,8 @@ class Ghost(Entity):
                 self.target = (px, py + 2) if self.board.is_walkable((px, py + 2)) else (px, py)
             case 3:
                 self.target = (px - 4, py - 4) if self.board.is_walkable((px - 4, py - 4)) else (px, py)
+        if self.mode is GhostMode.FRIGHTENED:
+            self.target = (px, py)
         if self.current_target != self.target:
             self.player_map: dict[tuple[int, int], int] = self._distance_from(self.target)
             self.current_target = self.target
@@ -69,7 +68,6 @@ class Ghost(Entity):
             self.respawn_timer -= 1 / fps
             if self.respawn_timer <= 0:
                 self.reset()
-            # return
         super().update(fps)
 
     def _choose_direction(self) -> None:
@@ -78,8 +76,8 @@ class Ghost(Entity):
             for d in self.MOVES
             if self._can_move(d) and d is not self.OPPOSITE[self.direction]
         ]
-        # if not options:  # dead end must turn back
-        #     options = [d for d in self.MOVES if self._can_move(d)]
+        if not options:  # dead end must turn back
+            options = [d for d in self.MOVES if self._can_move(d)]
         if self.mode is not GhostMode.EATEN:
             free: list[Direction] = [
                 d for d in options
@@ -119,7 +117,7 @@ class Ghost(Entity):
         while q:
             current: tuple[int, int] = q.pop(0)
             for neighbor in self._neighbors(current):
-                if not neighbor in dist:
+                if neighbor not in dist:
                     dist[neighbor] = dist[current] + 1
                     q.append(neighbor)
 
