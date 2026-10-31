@@ -26,13 +26,28 @@ class LeaderboardView(View):
             "press esc to go back", size=14, y=90, color=constants.GREY
         )
 
+        self.header: pyglet.text.Label = self.make_label(
+            f"{'#':<3} {'NAME':<10} {'SCORE':>8}",
+            size=18,
+            y=constants.WINDOW_HEIGHT - 300,
+            color=(220, 220, 225, 255),
+        )
+        self.rule: pyglet.sprite.Sprite = pyglet.sprite.Sprite(
+            pyglet.image.SolidColorImagePattern(
+                (220, 220, 225, 255)
+            ).create_image(self.header.content_width, 4),
+            x=(constants.WINDOW_WIDTH - self.header.content_width) // 2,
+            y=self.header.y - 28,
+        )
+
         scores: list[tuple[str, int]] = self.load_scores()
         self.rows: list[pyglet.text.Label] = (
             [
                 self.make_label(
-                    f"{i + 1}. {name} {score}",
+                    f"{i + 1:<2}. {name:<10} {score:>8}",
                     size=18,
                     y=constants.WINDOW_HEIGHT - 364 - i * 56,
+                    color=constants.LIGHT_GREY,
                 )
                 for i, (name, score) in enumerate(scores)
             ]
@@ -46,6 +61,11 @@ class LeaderboardView(View):
                 )
             ]
         )
+        for i, color in enumerate(
+            [constants.YELLOW, constants.SILVER, constants.BRONZE]
+        ):
+            if i < len(scores):
+                self.rows[i].color = color
 
     @staticmethod
     def load_scores() -> list[tuple[str, int]]:
@@ -77,6 +97,8 @@ class LeaderboardView(View):
         self.background.draw()
         for line in self.title:
             line.draw()
+        self.header.draw()
+        self.rule.draw()
         for row in self.rows:
             row.draw()
         self.hint.draw()

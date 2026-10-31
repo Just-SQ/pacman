@@ -36,7 +36,7 @@ class View:
 
     @staticmethod
     def make_title(text: str, y: int, size: int) -> list[pyglet.text.Label]:
-        depth = max(2, size // 8)
+        depth = max(2, size // 8) + 1
         layers = (
             (depth, -depth, constants.BROWN),
             (depth // 2, -depth // 2, constants.GOLD),
