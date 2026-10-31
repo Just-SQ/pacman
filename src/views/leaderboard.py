@@ -27,43 +27,51 @@ class LeaderboardView(View):
         )
 
         scores: list[tuple[str, int]] = self.load_scores()
-        self.rows: list[pyglet.text.Label] = [
-            self.make_label(
-                f"{i + 1}. {name} {score}",
-                size=18,
-                y=constants.WINDOW_HEIGHT - 364 - i * 56,
-            )
-            for i, (name, score) in enumerate(scores)
-        ]
+        self.rows: list[pyglet.text.Label] = (
+            [
+                self.make_label(
+                    f"{i + 1}. {name} {score}",
+                    size=18,
+                    y=constants.WINDOW_HEIGHT - 364 - i * 56,
+                )
+                for i, (name, score) in enumerate(scores)
+            ]
+            if scores
+            else [
+                self.make_label(
+                    "no scores yet",
+                    size=18,
+                    y=constants.WINDOW_HEIGHT // 2,
+                    color=constants.GREY,
+                )
+            ]
+        )
 
     @staticmethod
     def load_scores() -> list[tuple[str, int]]:
         try:
             with open("leaderboard.json", "r") as f:
-                highscores: list[dict[Any, Any]] = json.load(f)
+                scores: list[dict[Any, Any]] = json.load(f)
         except OSError:
             return []
         except json.JSONDecodeError:
             print("[Warning]: leaderboard.json is not a valid json, ignored")
             return []
-        if not isinstance(highscores, list):
+        if not isinstance(scores, list):
             print("[Warning]: leaderboard.json must be a list, ignored")
             return []
 
         valid_scores: list[tuple[str, int]] = []
-        valid_scores_counts: int = min(10, len(highscores))
-        print(valid_scores_counts, len(highscores))
-        idx = 0
-        while idx < valid_scores_counts and idx < len(highscores):
-            name, score = next(iter(highscores[idx].items()))
-            if isinstance(name, str) and isinstance(score, int):
-                valid_scores.append((name, score))
-            else:
-                valid_scores_counts += 1
-            idx += 1
-        print(valid_scores_counts)
+        for score in scores:
+            if not isinstance(score, dict) or len(score) != 1:
+                continue
 
-        return sorted(valid_scores, key=lambda item: item[1], reverse=True)
+            name, val = next(iter(score.items()))
+            if type(val) is int and val > 0:
+                valid_scores.append((name, val))
+
+        valid_scores.sort(key=lambda item: item[1], reverse=True)
+        return valid_scores[:10]
 
     def draw(self) -> None:
         self.background.draw()

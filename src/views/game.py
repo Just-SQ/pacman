@@ -10,7 +10,7 @@ from src.game import Game, State
 from src.ghost import GhostMode
 from src.maze import Board
 from src.utils.entity import Direction
-from src.views import View, view
+from src.views import View
 
 
 class GameView(View):
