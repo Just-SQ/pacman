@@ -80,7 +80,7 @@ class Game:
             ghost.taken = {
                 tile
                 for other in self.ghosts
-                if other is not ghost and ghost.mode is not GhostMode.EATEN
+                if other is not ghost and other.mode is not GhostMode.EATEN
                 for tile in ((other.x, other.y), other.next_tile)
             }
             ghost.update(fps)

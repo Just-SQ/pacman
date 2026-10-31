@@ -14,8 +14,8 @@ class GhostMode(Enum):
 class Ghost(Entity):
     RESPAWN_DELAY: float = 10.0
     SPEED_MOVE: dict[GhostMode, float] = {
-        GhostMode.CHASE: 0.95,
-        GhostMode.FRIGHTENED: 0.6,
+        GhostMode.CHASE: 1,
+        GhostMode.FRIGHTENED: 0.7,
         GhostMode.EATEN: 2
     }
 
@@ -32,6 +32,7 @@ class Ghost(Entity):
         self.taken: set[tuple[int, int]] = set()
         self.spawn_map: dict[tuple[int, int], int] = self._distance_from(spawn)
         self.current_target: tuple[int, int] | None = None
+        self.RADIOUS: int = 5
 
     def set_mode(self, mode: GhostMode) -> None:
         if self.mode is GhostMode.CHASE and mode is GhostMode.FRIGHTENED:
@@ -71,10 +72,15 @@ class Ghost(Entity):
         super().update(fps)
 
     def _choose_direction(self) -> None:
+        near: bool = (
+            self.mode is GhostMode.FRIGHTENED
+            and self.player_map[(self.x, self.y)] <= self.RADIOUS
+        )
         options: list[Direction] = [
             d
             for d in self.MOVES
-            if self._can_move(d) and d is not self.OPPOSITE[self.direction]
+            if self._can_move(d)
+            and (near or d is not self.OPPOSITE[self.direction])
         ]
         if not options:  # dead end must turn back
             options = [d for d in self.MOVES if self._can_move(d)]
