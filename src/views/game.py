@@ -214,25 +214,32 @@ class GameView(View):
         self.pacman.x, self.pacman.y = self._tile_center(col, row)
 
     def _place_ghosts(self) -> None:
+        blink_speed = 6 if self.game.power_time < 2 else 2
         frightened_blink = (
-            self.game.power_time < 3 and int(self.game.power_time * 2) % 2 == 1
+            self.game.power_time < 4
+            and int(self.game.power_time * blink_speed) % 2 == 1
         )
+
         for ghost, sprite in zip(self.game.ghosts, self.ghosts):
             col, row = ghost.visual_position()
             sprite.x, sprite.y = self._tile_center(col, row)
             sprite.visible = True
+
             if ghost.mode is GhostMode.FRIGHTENED:
                 sprite.image = self.scared_image
                 if frightened_blink:
                     sprite.image = self.ghost_images[ghost.g_id]
+
             elif ghost.mode is GhostMode.EATEN:
                 sprite.image = self.eyes_image
+                blink_speed = 6 if ghost.respawn_timer < 2 else 2
                 eaten_blink = (
-                    ghost.respawn_timer < 3
-                    and int(ghost.respawn_timer * 2) % 2 == 1
+                    ghost.respawn_timer < 4
+                    and int(ghost.respawn_timer * blink_speed) % 2 == 1
                 )
                 if eaten_blink:
                     sprite.visible = False
+
             else:
                 sprite.image = self.ghost_images[ghost.g_id]
 
@@ -296,7 +303,7 @@ class GameView(View):
 
     def update(self, dt: float) -> View | None:
         if self.paused:
-            return
+            return None
 
         if (
             self.game.state is State.VICTORY
@@ -323,6 +330,8 @@ class GameView(View):
             self.pacman.animate(dt)
 
         self._place_ghosts()
+
+        return None
 
     def draw(self) -> None:
         self.maze.draw()
