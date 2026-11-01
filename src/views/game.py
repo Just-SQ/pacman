@@ -11,6 +11,7 @@ from src.ghost import GhostMode
 from src.maze import Board
 from src.utils.entity import Direction
 from src.views import View
+from src.views.results import ResultsView
 
 
 class GameView(View):
@@ -309,7 +310,11 @@ class GameView(View):
             self.game.state is State.VICTORY
             or self.game.state is State.GAME_OVER
         ):
-            return self.menu_view
+            return ResultsView(
+                self.menu_view,
+                self.game.state is State.VICTORY,
+                self.game.score,
+            )
 
         lives = self.game.lives
         if self.ready_time > 0:

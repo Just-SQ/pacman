@@ -87,7 +87,7 @@ class LeaderboardView(View):
                 continue
 
             name, val = next(iter(score.items()))
-            if type(val) is int and val > 0:
+            if type(val) is int and val >= 0:
                 valid_scores.append((name, val))
 
         valid_scores.sort(key=lambda item: item[1], reverse=True)
