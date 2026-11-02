@@ -1,3 +1,5 @@
+import json
+
 import pyglet
 from pyglet.window import key
 
@@ -34,6 +36,32 @@ class ResultsView(View):
             "press enter to save", 14, 90, color=constants.GREY
         )
 
+    def dump_score(self) -> None:
+        scores: list[dict[str, int]] = []
+        try:
+            with open("leaderboard.json", "+r") as f:
+                scores = json.load(f)
+        except json.JSONDecodeError:
+            print("[Warning]: leaderboard.json is not a valid json, ignored")
+        if not isinstance(scores, list):
+            print("[Warning]: leaderboard.json must be a list, ignored")
+
+        valid_scores: list[dict[str, int]] = []
+        score_updated: bool = False
+        for score in scores:
+            if isinstance(score, dict) and len(score) == 1:
+                name, val = next(iter(score.items()))
+                if type(val) is int and val >= 0:
+                    if name == self.name.strip() and self.score > val:
+                        val = self.score
+                        score_updated = True
+                    valid_scores.append({name: val})
+        if not score_updated:
+            valid_scores.append({self.name.strip(): self.score})
+
+        with open("leaderboard.json", "w") as f:
+            json.dump(valid_scores, f, indent=2)
+
     def draw(self) -> None:
         self.background.draw()
         for layer in self.title:
@@ -44,6 +72,16 @@ class ResultsView(View):
         self.hint.draw()
 
     def key_handler(self, symbol: int) -> View | None:
-        if symbol == key.RETURN:
+        if symbol == key.RETURN and self.name.strip():
+            self.dump_score()
             return self.menu_view
+        if len(self.name) < 10 and (
+            (key.A <= symbol <= key.Z)
+            or (key._0 <= symbol <= key._9)
+            or symbol == key.SPACE
+        ):
+            self.name += chr(symbol).upper()
+        if symbol == key.BACKSPACE:
+            self.name = self.name[:-1]
+        self.name_label.text = f"{self.name:_<10}"
         return None
