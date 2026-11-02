@@ -5,18 +5,18 @@ from typing import Any
 class Parser:
     DEFAULT_CONFIG: dict[str, Any] = {
         "highscore_filename": "top_scores.txt",
-        "level": (9, 9),
+        "level": (10, 10),
         "lives": 10,
-        "points_per_pacgum": 5,
-        "points_per_super_pacgum": 100,
-        "points_per_ghost": 500,
+        "points_per_pacgum": 10,
+        "points_per_super_pacgum": 50,
+        "points_per_ghost": 200,
     }
     BOUNDS: dict[str, tuple[int, int]] = {
         "lives": (1, 99),
         "points_per_pacgum": (1, 100000),
         "points_per_super_pacgum": (1, 100000),
         "points_per_ghost": (1, 100000),
-        "level": (5, 50),
+        "level": (5, 25),
     }
 
     def __init__(self, path: str) -> None:
