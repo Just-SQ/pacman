@@ -9,11 +9,9 @@ from src.views import View
 
 
 class LeaderboardView(View):
-    def __init__(
-        self,
-        prev_view: View,
-    ) -> None:
+    def __init__(self, prev_view: View, highscore_filename: str) -> None:
         self.prev_view: View = prev_view
+        self.highscore_filename: str = highscore_filename
         self.background: pyglet.sprite.Sprite = pyglet.sprite.Sprite(
             pyglet.image.load("assets/images/menu_bg.png"),
             x=0,
@@ -44,7 +42,7 @@ class LeaderboardView(View):
         self.rows: list[pyglet.text.Label] = (
             [
                 self.make_label(
-                    f"{i + 1:<2}. {name:<10} {score:>8}",
+                    f"{i + 1:<3} {name:<10} {score:>8}",
                     size=18,
                     y=constants.WINDOW_HEIGHT - 364 - i * 56,
                     color=constants.LIGHT_GREY,
@@ -67,18 +65,22 @@ class LeaderboardView(View):
             if i < len(scores):
                 self.rows[i].color = color
 
-    @staticmethod
-    def load_scores() -> list[tuple[str, int]]:
+    def load_scores(self) -> list[tuple[str, int]]:
         try:
-            with open("leaderboard.json", "r") as f:
+            with open(self.highscore_filename, "r") as f:
                 scores: list[dict[Any, Any]] = json.load(f)
         except OSError:
             return []
         except json.JSONDecodeError:
-            print("[Warning]: leaderboard.json is not a valid json, ignored")
+            print(
+                f"[Warning]: {self.highscore_filename} is not"
+                + "a valid json, ignored"
+            )
             return []
         if not isinstance(scores, list):
-            print("[Warning]: leaderboard.json must be a list, ignored")
+            print(
+                f"[Warning]: {self.highscore_filename} must be a list, ignored"
+            )
             return []
 
         valid_scores: list[tuple[str, int]] = []

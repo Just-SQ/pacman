@@ -312,6 +312,7 @@ class GameView(View):
         ):
             return ResultsView(
                 self.menu_view,
+                self.settings["highscore_filename"],
                 self.game.state is State.VICTORY,
                 self.game.score,
             )

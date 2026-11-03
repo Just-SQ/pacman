@@ -8,8 +8,15 @@ from src.views import View
 
 
 class ResultsView(View):
-    def __init__(self, menu_view: View, victory: bool, score: int) -> None:
+    def __init__(
+        self,
+        menu_view: View,
+        highscore_filename: str,
+        victory: bool,
+        score: int,
+    ) -> None:
         self.menu_view: View = menu_view
+        self.highscore_filename: str = highscore_filename
         self.score: int = score
         self.name: str = ""
 
@@ -39,12 +46,20 @@ class ResultsView(View):
     def dump_score(self) -> None:
         scores: list[dict[str, int]] = []
         try:
-            with open("leaderboard.json", "+r") as f:
+            with open(self.highscore_filename, "r") as f:
                 scores = json.load(f)
+        except OSError:
+            pass
         except json.JSONDecodeError:
-            print("[Warning]: leaderboard.json is not a valid json, ignored")
+            print(
+                f"[Warning]: {self.highscore_filename} is"
+                + "not a valid json, ignored"
+            )
         if not isinstance(scores, list):
-            print("[Warning]: leaderboard.json must be a list, ignored")
+            print(
+                f"[Warning]: {self.highscore_filename} must be a list, ignored"
+            )
+            scores = []
 
         valid_scores: list[dict[str, int]] = []
         score_updated: bool = False
@@ -52,15 +67,18 @@ class ResultsView(View):
             if isinstance(score, dict) and len(score) == 1:
                 name, val = next(iter(score.items()))
                 if type(val) is int and val >= 0:
-                    if name == self.name.strip() and self.score > val:
-                        val = self.score
+                    if name == self.name.strip():
                         score_updated = True
+                        val = max(val, self.score)
                     valid_scores.append({name: val})
         if not score_updated:
             valid_scores.append({self.name.strip(): self.score})
 
-        with open("leaderboard.json", "w") as f:
-            json.dump(valid_scores, f, indent=2)
+        try:
+            with open(self.highscore_filename, "w") as f:
+                json.dump(valid_scores, f, indent=4)
+        except OSError:
+            print(f"[Warning]: could not save {self.highscore_filename}")
 
     def draw(self) -> None:
         self.background.draw()

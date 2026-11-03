@@ -1,5 +1,5 @@
 {
-  "highscore_filename": "newfile",
+  "highscore_filename": "leaderboard.json",
   "level": [10, 10],
   "lives": 10,
   "points_per_pacgum": 10,

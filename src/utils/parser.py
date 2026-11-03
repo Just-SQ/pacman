@@ -4,7 +4,7 @@ from typing import Any
 
 class Parser:
     DEFAULT_CONFIG: dict[str, Any] = {
-        "highscore_filename": "top_scores.txt",
+        "highscore_filename": "leaderboard.json",
         "level": (10, 10),
         "lives": 10,
         "points_per_pacgum": 10,
@@ -53,7 +53,7 @@ class Parser:
                     result[key] = self.DEFAULT_CONFIG[key]
                     print(
                         f"Warning: '{key}' must be text, "
-                        "using 'top_scores.txt'"
+                        "using 'leaderboard.json'"
                     )
         return result
 

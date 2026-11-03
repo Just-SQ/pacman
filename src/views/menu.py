@@ -130,7 +130,7 @@ class MenuView(View):
         if choice == "Start Game":
             return GameView(self, self.settings)
         if choice == "Leaderboard":
-            return LeaderboardView(self)
+            return LeaderboardView(self, self.settings["highscore_filename"])
         if choice == "Credit":
             return CreditView(self)
         if choice == "Instructions":
