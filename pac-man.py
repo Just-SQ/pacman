@@ -13,6 +13,13 @@ def main() -> None:
     arg_parse: ArgumentParser = ArgumentParser()
     _ = arg_parse.add_argument("config_file")
 
+    if getattr(sys, "frozen", False) and len(sys.argv) == 1:
+        sys.argv.append(
+            os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), "config.json"
+            )
+        )
+
     arg: Namespace = arg_parse.parse_args()
 
     parser: Parser = Parser(os.path.abspath(arg.config_file))

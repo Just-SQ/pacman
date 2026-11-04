@@ -1,0 +1,39 @@
+PAC-MAN - a 42 school project by rkadri and asaqi
+
+START
+    Double-click "pac-man" in the game folder.
+    Or, from a terminal inside the game folder:
+        ./pac-man                    uses _internal/config.json
+        ./pac-man my_config.json     uses your own config file
+
+GOAL
+    Eat every pacgum to clear the level. Clear all 10 levels to win.
+    Each level has a time limit (top right). Time out = game over.
+
+CONFIGURATION (_internal/config.json)
+    A JSON file. Lines starting with # are comments.
+    A missing or wrong value prints a warning and uses the default.
+    key                    | default            | allowed values
+    --------------------------------------------------------------------------
+    highscore_filename     | "leaderboard.json" | a file name ending in .json
+    level                  | [10, 10]           | maze [width, height], 5 to 25
+    lives                  | 3                  | 1 to 99
+    points_per_pacgum      | 10                 | 1 to 100000
+    points_per_super_pacgum| 50                 | 1 to 100000
+    points_per_ghost       | 200                | 1 to 100000
+
+CONTROLS
+    Move ............ arrow keys, WASD or HJKL
+    Pause / resume .. Esc
+    Main menu ....... Q (while paused)
+    Your name ....... letters, Enter to save
+
+CHEATS
+    I ... invincibility (toggle)
+    N ... skip to the next level
+    E ... one extra life
+
+HIGHSCORES
+    The scores are kept in _internal/, in the file named by
+    highscore_filename (leaderboard.json by default).
+    Names: up to 10 letters, digits or spaces.

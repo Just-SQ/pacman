@@ -10,7 +10,7 @@ run:
 	$(RUN) $(NAME) config.json
 
 debug:
-	$(RUN) -m pdb $(NAME)
+	$(RUN) -m pdb $(NAME) config.json
 
 clean:
 	rm -rf __pycache__ */__pycache__ */*/__pycache__ .mypy_cache dist .ruff_cache
@@ -21,5 +21,9 @@ lint:
 
 format:
 	$(RUN) ruff format .
+
+package:
+	$(RUN) pyinstaller pac-man.spec --noconfirm
+	$(RUN) python -m zipfile -c dist/pac-man-linux.zip dist/pac-man
 
 .PHONY: install run debug clean lint format

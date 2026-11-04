@@ -96,7 +96,7 @@ class Parser:
         except Exception:
             result[key] = self.DEFAULT_CONFIG[key]
             print(
-                f"Warning: '{key}' Invalid input. it must be a valid JSON filename "
-                "('.json' in the end),"
+                f"Warning: '{key}' Invalid input. it must be a valid "
+                "JSON filename ('.json' in the end),"
                 "using 'leaderboard.json'"
             )
