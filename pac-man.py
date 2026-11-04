@@ -1,4 +1,5 @@
 import os
+import sys
 from argparse import ArgumentParser, Namespace
 from json import JSONDecodeError
 
@@ -34,4 +35,4 @@ if __name__ == "__main__":
         pass
     except Exception as e:
         print(f"[ERROR]: {e}")
-        exit(1)
+        sys.exit(1)
