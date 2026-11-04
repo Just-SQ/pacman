@@ -27,7 +27,6 @@ class Game:
     def __init__(self, config: dict[str, Any]) -> None:
         self.config: dict[str, Any] = config
         self.score: int = 0
-        self.lives: int = self.config["lives"]
         self.level: int = 1
         self.state: State = State.RUNNING
         self.invicible: bool = False
@@ -35,6 +34,7 @@ class Game:
 
     def load_level(self) -> None:
         seed: int = 42 if self.level == 1 else 0
+        self.lives: int = self.config["lives"]
         self.board: Board = Board(
             MazeGenerator(size=self.config["level"], seed=seed)
         )

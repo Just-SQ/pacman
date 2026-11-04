@@ -6,7 +6,7 @@ class Parser:
     DEFAULT_CONFIG: dict[str, Any] = {
         "highscore_filename": "leaderboard.json",
         "level": (10, 10),
-        "lives": 10,
+        "lives": 3,
         "points_per_pacgum": 10,
         "points_per_super_pacgum": 50,
         "points_per_ghost": 200,
@@ -49,12 +49,7 @@ class Parser:
             elif key in self.BOUNDS:
                 self._validate_int_keys(result, key)
             elif key == "highscore_filename":
-                if not isinstance(result[key], str):
-                    result[key] = self.DEFAULT_CONFIG[key]
-                    print(
-                        f"Warning: '{key}' must be text, "
-                        "using 'leaderboard.json'"
-                    )
+                self._validate_filename(result, key)
         return result
 
     def _validate_int_keys(self, result: dict[str, Any], key: str) -> None:
@@ -65,7 +60,7 @@ class Parser:
             result[key] = int(result[key])
             if result[key] < low or result[key] > high:
                 raise ValueError()
-        except ValueError, TypeError:
+        except Exception:
             result[key] = self.DEFAULT_CONFIG[key]
             print(
                 f"Warning: {key} must be an integer "
@@ -93,3 +88,15 @@ class Parser:
         self, result: dict[str, Any], key: str, low: int, high: int
     ) -> Any:
         return low <= result[key][0] <= high and low <= result[key][1] <= high
+
+    def _validate_filename(self, result: dict[str, Any], key: str) -> None:
+        try:
+            if not result[key].endswith(".json") or "\0" in result[key]:
+                raise ValueError()
+        except Exception:
+            result[key] = self.DEFAULT_CONFIG[key]
+            print(
+                f"Warning: '{key}' Invalid input. it must be a valid JSON filename "
+                "('.json' in the end),"
+                "using 'leaderboard.json'"
+            )
