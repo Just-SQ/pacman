@@ -53,12 +53,12 @@ class Entity(ABC):
         self.direction = Direction.NONE
         self.progress = 0.0
 
-    def update(self, fps: int = 60) -> None:
+    def update(self, dt: float) -> None:
         if self.direction == Direction.NONE:
             self._choose_direction()
             if self.direction == Direction.NONE:
                 return
-        self.progress += self.speed / fps  # maybe xdt later
+        self.progress += self.speed * dt
         if self.progress >= 1.00:
             self.progress -= 1.00
             self.x, self.y = self.next_tile

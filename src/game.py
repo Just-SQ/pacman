@@ -16,7 +16,6 @@ class State(Enum):
 
 
 class Game:
-    # POWER_DURATION: float = 10.0
     MAX_LEVEL: int = 10
     PLAYER_SPEED: float = 7.0
     GHOST_SPEED: float = 5  # level 1: half the player speed
@@ -57,25 +56,24 @@ class Game:
         self.power_time: float = 0.0
         self.POWER_DURATION: float = min(30, len(self.pacgums) * 0.04)
 
-    def update(self, fps: int) -> None:
+    def update(self, dt: float) -> None:
         if self.state is not State.RUNNING:
             return
 
-        step: float = 1 / fps
-        self.time_left -= step
+        self.time_left -= dt
         if self.time_left <= 0:
             self.state = State.GAME_OVER
             return
 
         if self.power_time > 0:
-            self.power_time -= step
+            self.power_time -= dt
             if self.power_time <= 0:
                 self.power_time = 0.0
                 for ghost in self.ghosts:
                     if ghost.mode is GhostMode.FRIGHTENED:
                         ghost.set_mode(GhostMode.CHASE)
 
-        self.player.update(fps)
+        self.player.update(dt)
         for ghost in self.ghosts:
             ghost.set_target(self.player)
             ghost.taken = {
@@ -84,7 +82,7 @@ class Game:
                 if other is not ghost and other.mode is not GhostMode.EATEN
                 for tile in ((other.x, other.y), other.next_tile)
             }
-            ghost.update(fps)
+            ghost.update(dt)
 
         self._eat_gums()
         self._check_collisions()

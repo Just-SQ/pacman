@@ -77,12 +77,12 @@ class Ghost(Entity):
         super().reset()
         self.set_mode(GhostMode.CHASE)
 
-    def update(self, fps: int = 60) -> None:
+    def update(self, dt: float) -> None:
         if self.mode is GhostMode.EATEN:
-            self.respawn_timer -= 1 / fps
+            self.respawn_timer -= dt
             if self.respawn_timer <= 0:
                 self.reset()
-        super().update(fps)
+        super().update(dt)
 
     def _choose_direction(self) -> None:
         near: bool = (

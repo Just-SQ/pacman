@@ -321,7 +321,7 @@ class GameView(View):
         if self.ready_time > 0:
             self.ready_time -= dt
         else:
-            self.game.update(constants.FPS)
+            self.game.update(dt)
         if 0 < self.game.lives < lives:
             self.ready_time = 2
 
