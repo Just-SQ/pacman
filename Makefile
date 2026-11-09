@@ -13,7 +13,7 @@ debug:
 	$(RUN) -m pdb $(NAME) config.json
 
 clean:
-	rm -rf __pycache__ */__pycache__ */*/__pycache__ .mypy_cache dist .ruff_cache
+	rm -rf __pycache__ */__pycache__ */*/__pycache__ .mypy_cache dist build .ruff_cache
 
 lint:
 	$(RUN) flake8 . --exclude .venv
