@@ -2,6 +2,10 @@
 
 # PAC-MAN - Ghosts! More Ghosts!
 
+<p align="center">
+  <img align="center" width="90%" src="assets/images/cover.png" />
+</p>
+
 ## Description
 
 A remake of the arcade classic, written in Python. Every level is a fresh maze produced by an external package, which our loader turns into a Pac-Man playfield.
@@ -10,7 +14,7 @@ A remake of the arcade classic, written in Python. Every level is a fresh maze p
 
 ### Requirements
 
-- Python 3.10 or late
+- Python 3.14 or late
 - [uv](https://docs.astral.sh/uv/) for dependency management.
 
 ### Install and run
@@ -284,8 +288,11 @@ We were a team of two and split the work by layer:
 - **asaqi:** configuration parser, maze adapter (`Board`), entities and movement, ghost, game rules (`Game`).
 - **rkadri:** pyglet window and views, rendering, HUD, pause and cheat mode, leaderboard and results screens, assets.
 
-The work was tracked with
-<!-- TODO(team): b9i khasni n3mr hadchi -->
+The two layers meet in `GameView`, which reads the `Game` object every frame and passes the key presses to it.
+
+- **Timeline:** [`gantt.png`](project-management/gantt.png) shows our 9 phases, from project setup and parsing in early September to packaging and documentation in November, and which phase had to wait for which.
+- **Tasks:** We moved our task list to a GitHub Projects Kanban board (Backlog, In progress, Done). Each card is assigned to the person who did it. [`kanban.png`](project-management/kanban.png) is a snapshot of the board.
+- **Choices:** [`choices.md`](project-management/choices.md) explains our main technical choices and why we made them.
 
 ## Resources
 

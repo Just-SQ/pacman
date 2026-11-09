@@ -69,6 +69,7 @@ class GameView(View):
             "PAUSED", constants.WINDOW_HEIGHT // 2, 64
         )
         pause_hints = [
+            "Esc to resume",
             "Q for main menu",
             "Arrows, WASD or HJKL to move",
             "I for invincibility, N to skip level, E for extra life",
