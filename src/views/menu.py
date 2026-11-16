@@ -30,10 +30,8 @@ class MenuView(View):
     def __init__(self, settings: dict[str, Any]) -> None:
         self.settings: dict[str, Any] = settings
 
-        self.background: pyglet.sprite.Sprite = pyglet.sprite.Sprite(
-            pyglet.image.load("assets/images/menu_bg.png"),
-            x=0,
-            y=0,
+        self.background: pyglet.image.AbstractImage = pyglet.image.load(
+            "assets/images/menu_bg.png"
         )
         self.tagline: pyglet.text.Label = self.make_label(
             random.choice(self.TAGLINES),
@@ -44,12 +42,11 @@ class MenuView(View):
         self.title: list[pyglet.text.Label] = self.make_title(
             "PAC-MAN", size=96, y=768
         )
-        self.rule: pyglet.sprite.Sprite = pyglet.sprite.Sprite(
-            pyglet.image.SolidColorImagePattern(constants.YELLOW).create_image(
-                864, 6
-            ),
-            x=290,
-            y=682,
+        self.rule: pyglet.image.ImageData = pyglet.image.ImageData(
+            864,
+            6,
+            "RGBA",
+            bytes(constants.YELLOW) * (864 * 6),
         )
         self.version: pyglet.text.Label = self.make_label(
             "v13.37",
@@ -97,11 +94,11 @@ class MenuView(View):
         self.cursor.animate(dt)
 
     def draw(self) -> None:
-        self.background.draw()
+        self.background.blit(0, 0)
         self.tagline.draw()
         for layer in self.title:
             layer.draw()
-        self.rule.draw()
+        self.rule.blit(x=290, y=682)
         self.version.draw()
         for label in self.options:
             label.draw()

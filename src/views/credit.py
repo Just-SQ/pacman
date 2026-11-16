@@ -11,10 +11,8 @@ class CreditView(View):
         prev_view: View,
     ) -> None:
         self.prev_view: View = prev_view
-        self.background: pyglet.sprite.Sprite = pyglet.sprite.Sprite(
-            pyglet.image.load("assets/images/menu_bg.png"),
-            x=0,
-            y=0,
+        self.background: pyglet.image.AbstractImage = pyglet.image.load(
+            "assets/images/menu_bg.png"
         )
         self.title: list[pyglet.text.Label] = self.make_title(
             "Credit", constants.WINDOW_HEIGHT - 200, 44
@@ -36,7 +34,7 @@ class CreditView(View):
         )
 
     def draw(self) -> None:
-        self.background.draw()
+        self.background.blit(0, 0)
         for layer in self.title:
             layer.draw()
         for line in self.lines:

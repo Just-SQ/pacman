@@ -12,10 +12,9 @@ class LeaderboardView(View):
     def __init__(self, prev_view: View, highscore_filename: str) -> None:
         self.prev_view: View = prev_view
         self.highscore_filename: str = highscore_filename
-        self.background: pyglet.sprite.Sprite = pyglet.sprite.Sprite(
-            pyglet.image.load("assets/images/menu_bg.png"),
-            x=0,
-            y=0,
+
+        self.background: pyglet.image.AbstractImage = pyglet.image.load(
+            "assets/images/menu_bg.png"
         )
         self.title: list[pyglet.text.Label] = self.make_title(
             "Leaderboard", constants.WINDOW_HEIGHT - 200, 44
@@ -30,12 +29,11 @@ class LeaderboardView(View):
             y=constants.WINDOW_HEIGHT - 300,
             color=(220, 220, 225, 255),
         )
-        self.rule: pyglet.sprite.Sprite = pyglet.sprite.Sprite(
-            pyglet.image.SolidColorImagePattern(
-                (220, 220, 225, 255)
-            ).create_image(self.header.content_width, 4),
-            x=(constants.WINDOW_WIDTH - self.header.content_width) // 2,
-            y=self.header.y - 28,
+        self.rule: pyglet.image.ImageData = pyglet.image.ImageData(
+            self.header.content_width,
+            4,
+            "RGBA",
+            bytes((220, 220, 225, 255)) * (self.header.content_width * 4),
         )
 
         scores: list[tuple[str, int]] = self.load_scores()
@@ -96,11 +94,14 @@ class LeaderboardView(View):
         return valid_scores[:10]
 
     def draw(self) -> None:
-        self.background.draw()
+        self.background.blit(0, 0)
         for line in self.title:
             line.draw()
         self.header.draw()
-        self.rule.draw()
+        self.rule.blit(
+            x=(constants.WINDOW_WIDTH - self.header.content_width) // 2,
+            y=int(self.header.y - 28),
+        )
         for row in self.rows:
             row.draw()
         self.hint.draw()

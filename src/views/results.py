@@ -20,10 +20,8 @@ class ResultsView(View):
         self.score: int = score
         self.name: str = ""
 
-        self.background: pyglet.sprite.Sprite = pyglet.sprite.Sprite(
-            pyglet.image.load("assets/images/menu_bg.png"),
-            x=0,
-            y=0,
+        self.background: pyglet.image.AbstractImage = pyglet.image.load(
+            "assets/images/menu_bg.png"
         )
         self.title: list[pyglet.text.Label] = self.make_title(
             "YOU WIN!" if victory else "GAME OVER",
@@ -81,7 +79,7 @@ class ResultsView(View):
             print(f"[Warning]: could not save {self.highscore_filename}")
 
     def draw(self) -> None:
-        self.background.draw()
+        self.background.blit(0, 0)
         for layer in self.title:
             layer.draw()
         self.score_label.draw()
