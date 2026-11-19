@@ -31,7 +31,6 @@ class View:
             font_size=size,
             color=color,
             weight="normal",
-            font_name="Press Start 2P",
         )
 
     @staticmethod
@@ -55,3 +54,17 @@ class View:
         image.anchor_x = image.width // 2
         image.anchor_y = image.height // 2
         return image
+
+    @staticmethod
+    def image(name: str) -> pyglet.image.AbstractImage:
+        return pyglet.image.load(f"assets/images/{name}.png")
+
+    @staticmethod
+    def text(
+        string: str,
+        x: int,
+        y: int,
+        size: int = 28,
+        color: types.Color = constants.WHITE,
+    ) -> pyglet.text.Label:
+        return pyglet.text.Label(string, x=x, y=y, font_size=size, color=color)

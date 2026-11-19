@@ -13,47 +13,48 @@ class LeaderboardView(View):
         self.prev_view: View = prev_view
         self.highscore_filename: str = highscore_filename
 
-        self.background: pyglet.image.AbstractImage = pyglet.image.load(
-            "assets/images/menu_bg.png"
+        self.background: pyglet.image.AbstractImage = self.image("menu_bg")
+        self.title: pyglet.image.AbstractImage = self.image(
+            "title_leaderboard"
         )
-        self.title: list[pyglet.text.Label] = self.make_title(
-            "Leaderboard", constants.WINDOW_HEIGHT - 200, 44
-        )
-        self.hint: pyglet.text.Label = self.make_label(
-            "press esc to go back", size=14, y=90, color=constants.GREY
+        self.hint: pyglet.text.Label = self.text(
+            "press esc to go back", 632, 90, 14, constants.GREY
         )
 
-        self.header: pyglet.text.Label = self.make_label(
+        self.header: pyglet.text.Label = self.text(
             f"{'#':<3} {'NAME':<10} {'SCORE':>8}",
-            size=18,
-            y=constants.WINDOW_HEIGHT - 300,
-            color=(220, 220, 225, 255),
+            606,
+            constants.WINDOW_HEIGHT - 300,
+            18,
+            (220, 220, 225, 255),
         )
         self.rule: pyglet.image.ImageData = pyglet.image.ImageData(
-            self.header.content_width,
+            236,
             4,
             "RGBA",
-            bytes((220, 220, 225, 255)) * (self.header.content_width * 4),
+            bytes((220, 220, 225, 255)) * (236 * 4),
         )
 
         scores: list[tuple[str, int]] = self.load_scores()
         self.rows: list[pyglet.text.Label] = (
             [
-                self.make_label(
+                self.text(
                     f"{i + 1:<3} {name:<10} {score:>8}",
-                    size=18,
-                    y=constants.WINDOW_HEIGHT - 364 - i * 56,
-                    color=constants.LIGHT_GREY,
+                    606,
+                    constants.WINDOW_HEIGHT - 364 - i * 56,
+                    18,
+                    constants.LIGHT_GREY,
                 )
                 for i, (name, score) in enumerate(scores)
             ]
             if scores
             else [
-                self.make_label(
+                self.text(
                     "no scores yet",
-                    size=18,
-                    y=constants.WINDOW_HEIGHT // 2,
-                    color=constants.GREY,
+                    651,
+                    constants.WINDOW_HEIGHT // 2,
+                    18,
+                    constants.GREY,
                 )
             ]
         )
@@ -95,11 +96,10 @@ class LeaderboardView(View):
 
     def draw(self) -> None:
         self.background.blit(0, 0)
-        for line in self.title:
-            line.draw()
+        self.title.blit(0, 800)
         self.header.draw()
         self.rule.blit(
-            x=(constants.WINDOW_WIDTH - self.header.content_width) // 2,
+            x=606,
             y=int(self.header.y - 28),
         )
         for row in self.rows:

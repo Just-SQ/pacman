@@ -1,11 +1,9 @@
-import random
 from typing import Any
 
 import pyglet
 from pyglet.window import key
 
 from src import constants
-from src.entities.pacman import Pacman
 from src.views import View
 from src.views.credit import CreditView
 from src.views.game import GameView
@@ -21,40 +19,13 @@ class MenuView(View):
         "Credit",
         "Exit",
     )
-    TAGLINES: tuple[str, ...] = (
-        "ooh! ghost fight!",
-        "skcus iqasa!",
-        "skcus irdakr!",
-    )
 
     def __init__(self, settings: dict[str, Any]) -> None:
         self.settings: dict[str, Any] = settings
 
-        self.background: pyglet.image.AbstractImage = pyglet.image.load(
-            "assets/images/menu_bg.png"
-        )
-        self.tagline: pyglet.text.Label = self.make_label(
-            random.choice(self.TAGLINES),
-            24,
-            y=882,
-            color=constants.YELLOW,
-        )
-        self.title: list[pyglet.text.Label] = self.make_title(
-            "PAC-MAN", size=96, y=768
-        )
-        self.rule: pyglet.image.ImageData = pyglet.image.ImageData(
-            864,
-            6,
-            "RGBA",
-            bytes(constants.YELLOW) * (864 * 6),
-        )
-        self.version: pyglet.text.Label = self.make_label(
-            "v13.37",
-            20,
-            y=646,
-            x=1154,
-            anchor_x="right",
-        )
+        self.background: pyglet.image.AbstractImage = self.image("menu_bg")
+        self.title: pyglet.image.AbstractImage = self.image("title_pacman")
+
         self.hint: pyglet.text.Label = self.make_label(
             "arrow keys to choose, enter to select",
             14,
@@ -63,17 +34,14 @@ class MenuView(View):
         )
 
         self.options: list[pyglet.text.Label] = [
-            self.make_label(
+            self.text(
                 text,
-                24,
+                300,
                 y=constants.WINDOW_HEIGHT - 490 - i * 58,
             )
             for i, text in enumerate(self.OPTIONS)
         ]
         self.selected_option: int = 0
-
-        self.cursor: Pacman = Pacman()
-
         self._move_cursor()
 
     def _move_cursor(self) -> None:
@@ -84,25 +52,11 @@ class MenuView(View):
                 else constants.LIGHT_GREY
             )
 
-        selected_option = self.options[self.selected_option]
-        self.cursor.x = (
-            selected_option.x - selected_option.content_width / 2 - 42
-        )
-        self.cursor.y = selected_option.y
-
-    def update(self, dt: float) -> None:
-        self.cursor.animate(dt)
-
     def draw(self) -> None:
         self.background.blit(0, 0)
-        self.tagline.draw()
-        for layer in self.title:
-            layer.draw()
-        self.rule.blit(x=290, y=682)
-        self.version.draw()
+        self.title.blit(0, 700)
         for label in self.options:
             label.draw()
-        self.cursor.draw()
         self.hint.draw()
 
     def key_handler(self, symbol: int) -> View | None:

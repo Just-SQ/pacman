@@ -1,7 +1,7 @@
 from typing import Any
 
 import pyglet
-from pyglet.gl import GL_NEAREST, glViewport
+from pyglet.gl import GL_NEAREST
 
 from src import constants
 
@@ -14,12 +14,10 @@ pyglet.image.Texture.default_mag_filter = GL_NEAREST
 
 class GameWindow(pyglet.window.Window):
     def __init__(self, settings: dict[str, Any]) -> None:
-        super().__init__(fullscreen=True, caption="Pac-Man")
-        pyglet.font.add_file("assets/fonts/PressStart2P-Regular.ttf")
+        super().__init__(
+            constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT, caption="Pac-Man"
+        )
         pyglet.clock.schedule_interval(self.update, 1 / constants.FPS)
-
-        self.margin_x: int = (self.width - constants.WINDOW_WIDTH) // 2
-        self.margin_y: int = (self.height - constants.WINDOW_HEIGHT) // 2
 
         self.current_view: View = MenuView(settings)
         self.settings: dict[str, Any] = settings
@@ -31,12 +29,6 @@ class GameWindow(pyglet.window.Window):
 
     def on_draw(self) -> None:
         self.clear()
-        glViewport(
-            self.margin_x,
-            self.margin_y,
-            self.width,
-            self.height,
-        )
         self.current_view.draw()
 
     def on_key_press(self, symbol: int, modifiers: int) -> None:

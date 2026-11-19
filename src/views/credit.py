@@ -2,46 +2,27 @@ import pyglet
 from pyglet.window import key
 
 from src import constants
-from src.views import View
+from src.views.view import View
 
 
 class CreditView(View):
-    def __init__(
-        self,
-        prev_view: View,
-    ) -> None:
-        self.prev_view: View = prev_view
-        self.background: pyglet.image.AbstractImage = pyglet.image.load(
-            "assets/images/menu_bg.png"
-        )
-        self.title: list[pyglet.text.Label] = self.make_title(
-            "Credit", constants.WINDOW_HEIGHT - 200, 44
-        )
-        lines = [
-            "A 42 project",
-            "Made by rkadri and asaqi",
-        ]
+    def __init__(self, menu_view: View) -> None:
+        self.menu_view: View = menu_view
+        self.background: pyglet.image.AbstractImage = self.image("menu_bg")
+        self.title: pyglet.image.AbstractImage = self.image("title_credit")
         self.lines: list[pyglet.text.Label] = [
-            self.make_label(
-                line,
-                size=18,
-                y=constants.WINDOW_HEIGHT - 480 - i * 56,
-            )
-            for i, line in enumerate(lines)
+            self.text("A 42 project", 613, 540, 30),
+            self.text("Made by rkadri and asaqi", 489, 480, 30),
+            self.text("Esc to go back", 650, 80, 20, color=constants.GREY),
         ]
-        self.hint: pyglet.text.Label = self.make_label(
-            "press esc to go back", size=14, y=90, color=constants.GREY
-        )
 
     def draw(self) -> None:
         self.background.blit(0, 0)
-        for layer in self.title:
-            layer.draw()
+        self.title.blit(0, 800)
         for line in self.lines:
             line.draw()
-        self.hint.draw()
 
     def key_handler(self, symbol: int) -> View | None:
         if symbol == key.ESCAPE:
-            return self.prev_view
+            return self.menu_view
         return None

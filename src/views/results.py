@@ -20,25 +20,21 @@ class ResultsView(View):
         self.score: int = score
         self.name: str = ""
 
-        self.background: pyglet.image.AbstractImage = pyglet.image.load(
-            "assets/images/menu_bg.png"
+        self.background: pyglet.image.AbstractImage = self.image("menu_bg")
+        self.title: pyglet.image.AbstractImage = self.image(
+            "title_you_win" if victory else "title_game_over"
         )
-        self.title: list[pyglet.text.Label] = self.make_title(
-            "YOU WIN!" if victory else "GAME OVER",
-            constants.WINDOW_HEIGHT - 260,
-            64,
+        self.score_label: pyglet.text.Label = self.text(
+            f"SCORE {score}", 624, 640, 24, constants.YELLOW
         )
-        self.score_label: pyglet.text.Label = self.make_label(
-            f"SCORE {score}", 24, 640, color=constants.YELLOW
+        self.prompt: pyglet.text.Label = self.text(
+            "ENTER YOUR NAME", 615, 520, 18, constants.GREY
         )
-        self.prompt: pyglet.text.Label = self.make_label(
-            "ENTER YOUR NAME", 18, 520, color=constants.GREY
+        self.name_label: pyglet.text.Label = self.text(
+            f"{self.name:_<10}", 614, 440, 36
         )
-        self.name_label: pyglet.text.Label = self.make_label(
-            f"{self.name:_<10}", 36, 440
-        )
-        self.hint: pyglet.text.Label = self.make_label(
-            "press enter to save", 14, 90, color=constants.GREY
+        self.hint: pyglet.text.Label = self.text(
+            "press enter to save", 637, 90, 14, constants.GREY
         )
 
     def dump_score(self) -> None:
@@ -80,8 +76,7 @@ class ResultsView(View):
 
     def draw(self) -> None:
         self.background.blit(0, 0)
-        for layer in self.title:
-            layer.draw()
+        self.title.blit(0, 720)
         self.score_label.draw()
         self.prompt.draw()
         self.name_label.draw()
