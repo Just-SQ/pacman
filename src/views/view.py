@@ -14,48 +14,6 @@ class View:
         return None
 
     @staticmethod
-    def make_label(
-        text: str,
-        size: int,
-        y: int,
-        x: int = constants.WINDOW_WIDTH // 2,
-        color: types.Color = constants.WHITE,
-        anchor_x: Literal["left", "center", "right"] = "center",
-    ) -> pyglet.text.Label:
-        return pyglet.text.Label(
-            text,
-            x=x,
-            y=y,
-            anchor_x=anchor_x,
-            anchor_y="center",
-            font_size=size,
-            color=color,
-            weight="normal",
-        )
-
-    @staticmethod
-    def make_title(text: str, y: int, size: int) -> list[pyglet.text.Label]:
-        depth = max(2, size // 8) + 1
-        layers = (
-            (depth, -depth, constants.BROWN),
-            (depth // 2, -depth // 2, constants.GOLD),
-            (0, 0, constants.YELLOW),
-        )
-        labels: list[pyglet.text.Label] = []
-        for dx, dy, color in layers:
-            label = View.make_label(text, size, y + dy, color=color)
-            label.x += dx
-            labels.append(label)
-        return labels
-
-    @staticmethod
-    def _load_image(name: str) -> pyglet.image.AbstractImage:
-        image = pyglet.image.load(f"assets/images/{name}.png")
-        image.anchor_x = image.width // 2
-        image.anchor_y = image.height // 2
-        return image
-
-    @staticmethod
     def image(name: str) -> pyglet.image.AbstractImage:
         return pyglet.image.load(f"assets/images/{name}.png")
 

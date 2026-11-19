@@ -26,19 +26,16 @@ class MenuView(View):
         self.background: pyglet.image.AbstractImage = self.image("menu_bg")
         self.title: pyglet.image.AbstractImage = self.image("title_pacman")
 
-        self.hint: pyglet.text.Label = self.make_label(
+        self.hint: pyglet.text.Label = self.text(
             "arrow keys to choose, enter to select",
-            14,
+            500,
             y=84,
             color=constants.GREY,
+            size=18,
         )
 
         self.options: list[pyglet.text.Label] = [
-            self.text(
-                text,
-                300,
-                y=constants.WINDOW_HEIGHT - 490 - i * 58,
-            )
+            self.text(text, 300, y=constants.WINDOW_HEIGHT - 490 - i * 58)
             for i, text in enumerate(self.OPTIONS)
         ]
         self.selected_option: int = 0

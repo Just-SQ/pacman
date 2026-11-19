@@ -1,17 +1,11 @@
-import time
 from typing import Any
 
 import pyglet
-from pyglet.window import key
 
 from src import constants, types
-from src.entities.pacman import Pacman
-from src.game import Game, State
-from src.ghost import GhostMode
+from src.game import Game
 from src.maze import Board
-from src.utils.entity import Direction
 from src.views import View
-from src.views.results import ResultsView
 
 
 class GameView(View):
@@ -21,116 +15,30 @@ class GameView(View):
         self.game: Game = Game(self.settings)
 
         self._build_maze()
-        self.pacman: Pacman = Pacman(self.tile / 13)
-
-        left = constants.INFO_WIDTH // 2
-        right = constants.WINDOW_WIDTH - left
-        top = constants.WINDOW_HEIGHT - 60
-        bottom = 60
-        self.life_info_icon: Pacman = Pacman(2.5)
-        self.life_info_icon.image = self.life_info_icon.frames[2]
-        self.infos: dict[str, pyglet.text.Label] = {
-            "score": self.make_label("SCORE", 22, top, left),
-            "score_val": self.make_label(
-                "0", 18, top - 48, left, constants.YELLOW
-            ),
-            "time": self.make_label("TIMER", 22, top, right),
-            "time_val": self.make_label(
-                "0", 18, top - 48, right + 2, constants.YELLOW
-            ),
-            "lives": self.make_label("LIVES", 22, bottom + 48, right),
-            "lives_val": self.make_label(
-                f"x{self.game.lives}",
-                18,
-                bottom,
-                int(right + self.life_info_icon.width // 2),
-                constants.YELLOW,
-            ),
-            "level": self.make_label("LEVEL", 22, bottom + 48, left),
-            "level_val": self.make_label(
-                str(self.game.level), 18, bottom, left, constants.YELLOW
-            ),
-        }
-        self.life_info_icon.y = bottom
-
-        self.ghost_images: list[pyglet.image.AbstractImage] = [
-            self._load_image(f"ghost_{n}") for n in range(4)
-        ]
-        self.scared_image: pyglet.image.AbstractImage = self._load_image(
-            "ghost_scared"
-        )
-        self.eyes_image: pyglet.image.AbstractImage = self._load_image(
-            "ghost_eyes"
-        )
-        self.ghosts: list[pyglet.sprite.Sprite] = self._make_ghosts()
-
-        self.paused: bool = False
-        self.pause_title: list[pyglet.text.Label] = self.make_title(
-            "PAUSED", constants.WINDOW_HEIGHT // 2, 64
-        )
-        pause_hints = [
-            "Esc to resume",
-            "Q for main menu",
-            "Arrows, WASD or HJKL to move",
-            "I for invincibility, N to skip level, E for extra life",
-        ]
-        self.pause_hints: list[pyglet.text.Label] = [
-            self.make_label(
-                pause_hint,
-                12,
-                constants.WINDOW_HEIGHT // 2 - (80 + 34 * i),
-                color=constants.GREY,
-            )
-            for i, pause_hint in enumerate(pause_hints)
-        ]
-        self.pause_shade: pyglet.sprite.Sprite = pyglet.sprite.Sprite(
-            pyglet.image.SolidColorImagePattern((0, 0, 0, 170)).create_image(
-                constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT
-            )
-        )
-
-        self.ready_title: list[pyglet.text.Label] = self.make_title(
-            "Ready!", constants.WINDOW_HEIGHT // 2, 52
-        )
 
     def _build_maze(self) -> None:
-        self.ready_time: float = 2
         self.board: Board = self.game.board
         self.cols: int = len(self.board.grid[0])
         self.rows: int = len(self.board.grid)
-        self.tile: int = min(
-            (constants.WINDOW_HEIGHT - constants.INFO_HEIGHT) // self.rows,
-            (constants.WINDOW_WIDTH - constants.INFO_WIDTH) // self.cols,
-        )
+        self.tile: int = 20
 
         self.image_width: int = self.cols * self.tile
         self.image_height: int = self.rows * self.tile
-        self.pixels: bytearray = bytearray(
-            bytes(constants.BLACK) * (self.image_width * self.image_height)
-        )
+        self.pixels: list[list[bytes]] = [
+            [bytes(constants.BLACK)] * self.image_width
+            for _ in range(self.image_height)
+        ]
 
-        wall_size = round(self.tile * 0.4)
-
-        self.gums_on_screen: set[tuple[int, int]] = set(self.game.pacgums)
-
+        wall_size = round(self.tile * 0.6)
         self._paint_walls(wall_size, constants.BLUE)
-        self._paint_walls(round(wall_size * 0.4), constants.TRANSPARENT_BLUE)
-        self._paint_gums()
+        self._paint_walls(round(wall_size * 0.3), constants.BLACK)
 
-        self.maze_image: pyglet.image.ImageData = pyglet.image.ImageData(
+        self.maze: pyglet.image.ImageData = pyglet.image.ImageData(
             self.image_width,
             self.image_height,
             "RGBA",
-            bytes(self.pixels),
+            b"".join(pixel for line in self.pixels for pixel in line),
             pitch=-self.image_width * 4,
-        )
-        self.maze: pyglet.sprite.Sprite = pyglet.sprite.Sprite(
-            self.maze_image,
-            x=(constants.WINDOW_WIDTH - self.image_width) // 2,
-            y=(constants.WINDOW_HEIGHT - self.image_height) // 2,
-        )
-        self.supergums: dict[tuple[int, int], pyglet.sprite.Sprite] = (
-            self._make_supergums()
         )
 
     def _paint_walls(self, size: int, color: types.Color) -> None:
@@ -140,251 +48,30 @@ class GameView(View):
                 if self.board.is_walkable((col, row)):
                     continue
 
-                left = col * self.tile + margin
-                top = row * self.tile + margin
-                self._paint_rounded_square(left, top, size, color)
+                x = col * self.tile + margin
+                y = row * self.tile + margin
+                self._paint_rectangle(x, y, size, size, color)
 
-                if col + 1 < self.cols and not self.board.is_walkable(
-                    (col + 1, row)
-                ):
-                    self._paint_rectangle(
-                        left + round(size * 0.8),
-                        top,
-                        self.tile,
-                        size,
-                        color,
-                    )
-                if row + 1 < self.rows and not self.board.is_walkable(
-                    (col, row + 1)
-                ):
-                    self._paint_rectangle(
-                        left,
-                        top + round(size * 0.8),
-                        size,
-                        self.tile,
-                        color,
-                    )
                 if (
-                    col + 1 < self.cols
-                    and row + 1 < self.rows
-                    and not self.board.is_walkable((col + 1, row))
-                    and not self.board.is_walkable((col, row + 1))
-                    and not self.board.is_walkable((col + 1, row + 1))
+                    not self.board.is_walkable((col + 1, row))
+                    and col + 1 < self.cols
                 ):
-                    self._paint_rectangle(
-                        left + round(size * 0.8),
-                        top + round(size * 0.8),
-                        self.tile,
-                        self.tile,
-                        color,
-                    )
+                    self._paint_rectangle(x + size, y, margin * 2, size, color)
 
-    def _paint_gums(self) -> None:
-        size = round(self.tile * 0.2)
-        margin: int = (self.tile - size) // 2
-        for col, row in self.game.pacgums:
-            left: int = col * self.tile + margin
-            top: int = row * self.tile + margin
-            self._paint_rectangle(left, top, size, size, constants.PINK)
-
-    def _make_supergums(self) -> dict[tuple[int, int], pyglet.sprite.Sprite]:
-        image = pyglet.image.load("assets/images/supergum.png")
-        image.anchor_x = image.width // 2
-        image.anchor_y = image.height // 2
-
-        sprites: dict[tuple[int, int], pyglet.sprite.Sprite] = {}
-        for col, row in self.game.sup_gums:
-            x, y = self._tile_center(col, row)
-            sprite = pyglet.sprite.Sprite(image, x=x, y=y)
-            sprite.scale = self.tile * 0.6 / image.width
-            sprites[col, row] = sprite
-        return sprites
-
-    def _make_ghosts(self) -> list[pyglet.sprite.Sprite]:
-        sprites: list[pyglet.sprite.Sprite] = []
-        for ghost in self.game.ghosts:
-            image = self.ghost_images[ghost.g_id]
-            image.anchor_x = image.width // 2
-            image.anchor_y = image.height // 2
-            sprite = pyglet.sprite.Sprite(image)
-            sprite.scale = self.tile / image.width
-            sprites.append(sprite)
-        return sprites
-
-    def _place_pacman(self) -> None:
-        col, row = self.game.player.visual_position()
-        self.pacman.x, self.pacman.y = self._tile_center(col, row)
-
-    def _place_ghosts(self) -> None:
-        blink_speed = 6 if self.game.power_time < 2 else 2
-        frightened_blink = (
-            self.game.power_time < 4
-            and int(self.game.power_time * blink_speed) % 2 == 1
-        )
-
-        for ghost, sprite in zip(self.game.ghosts, self.ghosts):
-            col, row = ghost.visual_position()
-            sprite.x, sprite.y = self._tile_center(col, row)
-            sprite.visible = True
-
-            if ghost.mode is GhostMode.FRIGHTENED:
-                sprite.image = self.scared_image
-                if frightened_blink:
-                    sprite.image = self.ghost_images[ghost.g_id]
-
-            elif ghost.mode is GhostMode.EATEN:
-                sprite.image = self.eyes_image
-                blink_speed = 6 if ghost.respawn_timer < 2 else 2
-                eaten_blink = (
-                    ghost.respawn_timer < 4
-                    and int(ghost.respawn_timer * blink_speed) % 2 == 1
-                )
-                if eaten_blink:
-                    sprite.visible = False
-
-            else:
-                sprite.image = self.ghost_images[ghost.g_id]
-
-    def _tile_center(self, col: float, row: float) -> tuple[float, float]:
-        left = (constants.WINDOW_WIDTH - self.image_width) // 2
-        bottom = (constants.WINDOW_HEIGHT - self.image_height) // 2
-        x = left + round(col * self.tile) + self.tile / 2
-        y = bottom + round((self.rows - row - 1) * self.tile) + self.tile / 2
-        return x, y
-
-    def _paint_rounded_square(
-        self, left: int, top: int, size: int, color: types.Color
-    ) -> None:
-        notch = round(size * 0.2)
-        thickness = size - 2 * notch
-        self._paint_rectangle(left + notch, top, thickness, size, color)
-        self._paint_rectangle(left, top + notch, size, thickness, color)
+                if (
+                    not self.board.is_walkable((col, row + 1))
+                    and row + 1 < self.rows
+                ):
+                    self._paint_rectangle(x, y + size, size, margin * 2, color)
 
     def _paint_rectangle(
-        self, left: int, top: int, width: int, height: int, color: types.Color
-    ) -> None:
-        for y in range(top, top + height):
-            start = (left + y * self.image_width) * 4
-            end = start + width * 4
-            self.pixels[start:end] = bytes(color) * width
-
-    def _erase_eaten_gums(self) -> None:
-        eaten = self.gums_on_screen - self.game.pacgums
-        for cor in eaten:
-            self._erase_eaten_gum(*cor)
-        self.gums_on_screen -= eaten
-
-    def _erase_eaten_gum(self, col: int, row: int) -> None:
-        size = round(self.tile * 0.2)
-        margin = (self.tile - size) // 2
-        black = pyglet.image.ImageData(
-            size, size, "RGBA", bytes(constants.BLACK) * size**2
-        )
-        x = col * self.tile + margin
-        top = row * self.tile + margin
-        y = self.image_height - top - size
-        self.maze_image.get_texture().blit_into(black, x, y, 0)
-
-    def _draw_infos(self) -> None:
-        self.infos["score_val"].text = str(self.game.score)
-        self.infos["time_val"].text = time.strftime(
-            "%M:%S", time.gmtime(max(0, self.game.time_left))
-        )
-        self.infos["level_val"].text = str(self.game.level)
-        self.infos["lives_val"].text = f"x{self.game.lives}"
-
-        for info in self.infos.values():
-            info.draw()
-
-        self.life_info_icon.x = (
-            constants.WINDOW_WIDTH
-            - constants.INFO_WIDTH // 2
-            - (self.infos["lives_val"].content_width // 1.6)
-        )
-        self.life_info_icon.draw()
-
-    def update(self, dt: float) -> View | None:
-        if self.paused:
-            return None
-
-        if (
-            self.game.state is State.VICTORY
-            or self.game.state is State.GAME_OVER
-        ):
-            return ResultsView(
-                self.menu_view,
-                self.settings["highscore_filename"],
-                self.game.state is State.VICTORY,
-                self.game.score,
-            )
-
-        lives = self.game.lives
-        if self.ready_time > 0:
-            self.ready_time -= dt
-        else:
-            self.game.update(dt)
-        if 0 < self.game.lives < lives:
-            self.ready_time = 2
-
-        if self.board is not self.game.board:
-            self._build_maze()
-        self._erase_eaten_gums()
-
-        self._place_pacman()
-        direction = self.game.player.direction
-        if direction != Direction.NONE:
-            self.pacman.face(direction)
-            self.pacman.animate(dt)
-
-        self._place_ghosts()
-
-        return None
+        self, x: int, y: int, width: int, height: int, color: types.Color
+    ):
+        for line in range(y, y + height):
+            self.pixels[line][x : x + width] = [bytes(color)] * width
 
     def draw(self) -> None:
-        self.maze.draw()
-        for corr, supergum in self.supergums.items():
-            if corr in self.game.sup_gums:
-                supergum.draw()
-        self.pacman.draw()
-        self._draw_infos()
-
-        for ghost in self.ghosts:
-            ghost.draw()
-
-        if self.paused:
-            self.pause_shade.draw()
-            for layer in self.pause_title:
-                layer.draw()
-            for pause_hint in self.pause_hints:
-                pause_hint.draw()
-
-        if self.ready_time > 0 and not self.paused:
-            self.pause_shade.draw()
-            for layer in self.ready_title:
-                layer.draw()
-
-    def key_handler(self, symbol: int) -> View | None:
-        if symbol == key.Q and self.paused:
-            return self.menu_view
-        if symbol == key.ESCAPE:
-            self.paused = not self.paused
-        if self.paused or self.ready_time > 0:
-            return None
-
-        if symbol in (key.UP, key.W, key.K):
-            self.game.player.dir_wanted = Direction.UP
-        if symbol in (key.DOWN, key.S, key.J):
-            self.game.player.dir_wanted = Direction.DOWN
-        if symbol in (key.LEFT, key.A, key.H):
-            self.game.player.dir_wanted = Direction.LEFT
-        if symbol in (key.RIGHT, key.D, key.L):
-            self.game.player.dir_wanted = Direction.RIGHT
-        if symbol == key.I:
-            self.game.invicible = not self.game.invicible
-            self.pacman.opacity = 100 if self.game.invicible else 255
-        if symbol == key.N:
-            self.game.pacgums.clear()
-            self.game.sup_gums.clear()
-        if symbol == key.E:
-            self.game.lives += 1
-        return None
+        self.maze.blit(
+            (constants.WINDOW_WIDTH // 2 - self.image_width // 2),
+            (constants.WINDOW_HEIGHT // 2 - self.image_height // 2),
+        )
