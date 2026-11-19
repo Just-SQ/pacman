@@ -1,5 +1,3 @@
-from typing import Literal
-
 import pyglet
 
 from src import constants, types
