@@ -1,7 +1,0 @@
-{
-    "reportImplicitOverride": false,
-    "reportAny": false,
-    "reportExplicitAny": false,
-    "reportUnreachable": false,
-    "reportUnnecessaryIsInstance": false
-}

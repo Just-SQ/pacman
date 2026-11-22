@@ -8,7 +8,7 @@ START
 
 GOAL
     Eat every pacgum to clear the level. Clear all 10 levels to win.
-    Each level has a time limit (top right). Time out = game over.
+    Each level has a time limit (bottom left). Time out = game over.
 
 CONFIGURATION (_internal/config.json)
     A JSON file. Lines starting with # are comments.
@@ -26,7 +26,7 @@ CONTROLS
     Move ............ arrow keys, WASD or HJKL
     Pause / resume .. Esc
     Main menu ....... Q (while paused)
-    Your name ....... letters, Enter to save
+    Your name ....... letters, digits, space; Backspace erases, Enter saves
 
 CHEATS
     I ... invincibility (toggle)

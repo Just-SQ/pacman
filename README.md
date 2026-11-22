@@ -14,7 +14,7 @@ A remake of the arcade classic, written in Python. Every level is a fresh maze p
 
 ### Requirements
 
-- Python 3.14 or late
+- Python 3.14 or later
 - [uv](https://docs.astral.sh/uv/) for dependency management.
 
 ### Install and run
@@ -72,11 +72,11 @@ In the packaged game:
 
 ### Cheat Mode
 
-Available during play (not while paused or during the "Ready!" screen):
+Available during play (not while paused):
 
 | Key | Cheat                                                          |
 |-----|----------------------------------------------------------------|
-| `I` | Toggle invincibility (Pac-Man turns translucent; ghosts can't kill him) |
+| `I` | Toggle invincibility ("INVINCIBLE" shows at the top left; ghosts can't kill him) |
 | `N` | Skip the current level (on level 10, wins the game)            |
 | `E` | Add an extra life                                              |
 
@@ -143,7 +143,7 @@ The path is relative to the **game's folder**, not to the folder you launch from
 ```
 
 - **Saving.** At the end of every game, win or lose, the player types a name: letters and digits (stored uppercase) and spaces, at most 10 characters, not blank. Pressing `Enter` reads the file, keeps the valid entries, and either adds the new entry or, if that name already exists, keeps the higher of the two scores. The file is then rewritten.
-- **Loading and display.** *Leaderboard* in the main menu reads the file, drops any invalid entry.
+- **Loading and display.** *Leaderboard* in the main menu reads the file, drops any invalid entry, and shows the 10 best scores, highest first.
 - **Robustness.** A missing file means an empty leaderboard. Invalid JSON or a file that is not a list prints a warning and is treated as empty; the next save replaces it with a valid leaderboard. If the file cannot be written, a warning is printed and the game carries on.
 
 **Why this design.**
@@ -191,7 +191,7 @@ Placing things on the board:
 
 ### Game Loop and Screens
 
-`GameWindow` (a full screen `pyglet.window.Window`) schedules `update` at 60 fps, `draw` and key presses to the current `View`. A view switches screens by returning the next view:
+`GameWindow` (a 1448 × 1012 `pyglet.window.Window`) schedules `update` at 60 fps, `draw` and key presses to the current `View`. A view switches screens by returning the next view:
 
 ```
 Menu ──► Game ──► Results (game over / victory + name) ──► Menu
@@ -240,7 +240,7 @@ The score carries over between levels and only ever increases. Lives are reset t
 
 ### Rendering
 
-The walls and pacgums are painted once per level, pixel by pixel, into an RGBA buffer that becomes a single image (`pyglet.image.ImageData`). When a pacgum is eaten, its square is overwritten in that image. Pac-Man, the ghosts and the super-pacgums are sprites drawn on top. Text uses the *Press Start 2P* font.
+The walls and pacgums are painted once per level, pixel by pixel, into a buffer (one list of pixels per row) that becomes a single image (`pyglet.image.ImageData`). When a pacgum is eaten, its 4 × 4 square is painted black in the buffer and the image is made again. Super-pacgums, Pac-Man and the ghosts are PNG images blitted on top, in that order: the last one drawn is on top. Pac-Man has one image per direction and per chomp frame, so nothing is rotated or scaled.
 
 ## General Software Architecture
 
@@ -260,17 +260,17 @@ src/
 ├── game.py              Game: levels, timers, score, lives, collisions
 ├── game_window.py       GameWindow: pyglet window, 60 Hz loop, view switching
 ├── views/
-│   ├── view.py          View: base class + label/title/image helpers
+│   ├── view.py          View: base class + image/text helpers
 │   ├── menu.py          MenuView
-│   ├── game.py          GameView: maze image, sprites, HUD, pause, cheats
+│   ├── game.py          GameView: maze image, characters, HUD, pause, cheats
 │   ├── results.py       ResultsView: game over / victory, name entry, save
 │   ├── leaderboard.py   LeaderboardView: top 10
 │   ├── instructions.py  InstructionsView
 │   └── credit.py        CreditView
-├── entities/pacman.py   Pacman sprite: chomp animation, facing
+├── entities/pacman.py   Pacman: 16 images (4 directions × 4 frames), chomp, facing
 ├── constants.py         window size, FPS, colours
 └── types.py             Color type alias
-assets/                  images and font
+assets/images/           PNG images (characters, titles, backgrounds)
 ```
 
 There are two layers:
@@ -300,7 +300,7 @@ The two layers meet in `GameView`, which reads the `Game` object every frame and
 - Chad Birch, *Understanding Pac-Man Ghost Behavior*: <https://gameinternals.com/understanding-pac-man-ghost-behavior>
 - Breadth-first search: <https://en.wikipedia.org/wiki/Breadth-first_search>
 - pyglet documentation: <https://pyglet.readthedocs.io/>
-- pyinstaller documentation: <https://pyinstaller.org/en/stable/search.html?q=glViewpor&check_keywords=yes&area=default>
+- pyinstaller documentation: <https://pyinstaller.org/en/stable/>
 
 ### How AI was used
 
@@ -318,6 +318,6 @@ The two layers meet in `GameView`, which reads the `Game` object every frame and
 
 **rkadri:**
 
-- **Sprites:** the 11 sprite images in `assets/images/` were drawn by AI.
-- **UI ideas:** help with the cheat keys, the pause flow, the "Ready!" timer and the HUD layout
+- **Images:** the Pac-Man, ghost, super-pacgum and title images (`title_*.png`) in `assets/images/` were made by AI.
+- **UI ideas:** help with the cheat keys, the pause flow and the HUD layout.
 - **Bug review:** looking for crashes in the leaderboard and results screens.
