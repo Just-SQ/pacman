@@ -29,7 +29,6 @@ class Ghost(Entity):
         self.respawn_timer: float = 0.0
         self.target: tuple[int, int] = spawn
         self.g_id: int = g_id
-        self.taken: set[tuple[int, int]] = set()
         self.spawn_map: dict[tuple[int, int], int] = self._distance_from(spawn)
         self.current_target: tuple[int, int] | None = None
         self.RADIOUS: int = 7
@@ -97,14 +96,6 @@ class Ghost(Entity):
         ]
         if not options:  # dead end must turn back
             options = [d for d in self.MOVES if self._can_move(d)]
-        if self.mode is not GhostMode.EATEN:
-            free: list[Direction] = [
-                d
-                for d in options
-                if (self.x + d.value[0], self.y + d.value[1]) not in self.taken
-            ]
-            if free:
-                options = free
         if self.mode is GhostMode.FRIGHTENED:
             self.direction = max(options, key=self._distance)
             if self.next_tile == self.target:

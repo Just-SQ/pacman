@@ -26,4 +26,4 @@ package:
 	$(RUN) pyinstaller pac-man.spec --noconfirm
 	$(RUN) python -m zipfile -c dist/pac-man-linux.zip dist/pac-man
 
-.PHONY: install run debug clean lint format
+.PHONY: install run debug clean lint format package

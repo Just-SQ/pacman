@@ -134,7 +134,7 @@ class GameView(View):
             constants.WINDOW_HEIGHT // 2 - self.image_height // 2
         )
 
-        wall_size = round(self.tile * 0.6)
+        wall_size = round(self.tile * 0.4)
         self._paint_walls(wall_size, constants.BLUE)
         self._paint_walls(round(wall_size * 0.3), constants.BLACK)
 
@@ -246,8 +246,8 @@ class GameView(View):
     def draw(self) -> None:
         self.maze.blit(self.maze_start_x, self.maze_start_y)
         self._draw_supergums()
-        self.pacman.draw()
         self._draw_ghosts()
+        self.pacman.draw()
 
         for info in self.infos.values():
             info.draw()

@@ -29,11 +29,11 @@ class Game:
         self.level: int = 1
         self.state: State = State.RUNNING
         self.invicible: bool = False
+        self.lives: int = self.config["lives"]
         self.load_level()
 
     def load_level(self) -> None:
         seed: int = 42 if self.level == 1 else 0
-        self.lives: int = self.config["lives"]
         self.board: Board = Board(
             MazeGenerator(size=self.config["level"], seed=seed)
         )
@@ -76,12 +76,6 @@ class Game:
         self.player.update(dt)
         for ghost in self.ghosts:
             ghost.set_target(self.player)
-            ghost.taken = {
-                tile
-                for other in self.ghosts
-                if other is not ghost and other.mode is not GhostMode.EATEN
-                for tile in ((other.x, other.y), other.next_tile)
-            }
             ghost.update(dt)
 
         self._eat_gums()
